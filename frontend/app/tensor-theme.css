@@ -71,12 +71,27 @@ button:focus-visible,a:focus-visible,summary:focus-visible,.ui-checkbox input:fo
 .project-card,.projects-panel,.comparison-review article,.cost-line,.measure-option,.source-card,.landing .source-card,.chart-section,.landing .chart-section,.ask-section,.toast {
  background:var(--gc-surface);border-color:var(--gc-line);box-shadow:none;border-radius:14px;
 }
+.project-card .cost-table {grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;}
+.project-card .cost-line {display:flex;flex-direction:column;min-height:220px;padding:18px;background:var(--gc-surface);border:1px solid var(--gc-line);}
+.project-card .cost-line-summary {display:flex;flex:1;flex-direction:column;align-items:flex-start;gap:12px;}
+.project-card .cost-line-summary b {min-height:2.8em;min-width:0;}
+.project-card .cost-line-summary strong {font-size:20px;font-weight:600;}
+.project-card .cost-line .cost-row-editor {margin:auto 0 0;padding-top:12px;border-top:1px solid var(--gc-line);}
+.project-card .cost-row-editor>summary {display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:32px;}
+@media(max-width:1100px){.project-card .cost-table {grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:650px){.project-card .cost-table {grid-template-columns:minmax(0,1fr);}.project-card .cost-line {min-height:0;}}
 .form-topline {background:var(--gc-inset);border-color:var(--gc-line);border-radius:14px 14px 0 0;}.form-topline :is(span,button) {color:var(--gc-muted);}
 .form-stepper {background:var(--gc-inset);border-color:var(--gc-line);border-radius:12px;}.form-stepper button {color:var(--gc-muted);}
 .form-stepper .active {background:var(--gc-surface);color:var(--gc-text);box-shadow:none;}.form-stepper button span {background:var(--gc-raised);color:var(--gc-muted);}
 .form-stepper .active span,.stage-timeline .complete>span {background:var(--gc-accent);color:var(--gc-on-accent);border-color:var(--gc-accent);}
 .form-stepper .complete span {background:var(--gc-accent-soft);color:var(--gc-accent);}
 .form-block,.form-bottom,.form-details,.selected-features,.selected-features button,.provider-details,.comparison-review article {border-color:var(--gc-line)!important;}
+.selected-features {background:var(--gc-accent-soft);color:var(--gc-text);}
+.selected-features h4 {color:var(--gc-text);}
+.selected-features button {background:var(--gc-surface);color:var(--gc-text);}
+.selected-features button svg {color:var(--gc-accent);}
+.selected-features button span {color:var(--gc-muted);}
+.selected-features button:hover {background:var(--gc-inset);border-color:var(--gc-accent)!important;}
 .form-block h4:before {background:var(--gc-accent);}.field-label label,.form-block h4,.form-heading h3,.building-choices button,.terminal-totals b {color:var(--gc-text);}
 .landing :is(.small-note,.field small,.field>label,.form-heading p,.form-stepper b),.required-legend,.checkbox,.occupancy-estimate p,.apartment-area-total span {color:var(--gc-muted)!important;}
 .field input:not([type=checkbox]),.field textarea,.field select,.ui-select-trigger,.ask-controls input {
@@ -118,6 +133,9 @@ button:focus-visible,a:focus-visible,summary:focus-visible,.ui-checkbox input:fo
 .measure-option.selected {background:var(--gc-accent-soft);border-color:var(--gc-accent);box-shadow:none;}.measure-choice small {color:var(--gc-muted)!important;}
 .measure-choice .feature-icon,.feature-icon {background:var(--gc-inset);color:var(--gc-accent);}.measure-option.selected .feature-icon {background:var(--gc-accent);color:var(--gc-on-accent);}
 .measure-choice .feature-action,.measure-option.selected .feature-action {background:var(--gc-surface);border-color:var(--gc-line);color:var(--gc-accent);}
+.project-card .package-grid button {background:var(--gc-surface);border-color:var(--gc-line);color:var(--gc-muted);border-radius:10px;}
+.project-card .package-grid button:hover {background:var(--gc-inset);border-color:var(--gc-accent);}
+.project-card .package-grid button.chosen,.project-card .package-grid button.chosen:hover {background:var(--gc-accent-soft);border-color:var(--gc-accent);color:var(--gc-accent);}
 .measure-price,.feature-source,.measure-option .feature-source,.text-link,.back-link,.cost-line-summary strong,.comparison-footnote svg {color:var(--gc-accent);}
 .price-badge,.measure-option .price-badge,.assumption-status {background:var(--gc-inset);color:var(--gc-muted);}
 .sample-note,.inline-tip {background:var(--gc-accent-soft);color:var(--gc-text);}

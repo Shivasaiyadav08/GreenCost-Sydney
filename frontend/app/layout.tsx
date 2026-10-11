@@ -10,6 +10,7 @@ import './component-refresh.css';
 import './tensor-theme.css';
 import './ui-layer.css';
 import './forms.css';
+import './light-surfaces.css';
 import {themeInitialization} from '@/lib/theme-initialization';
 
 export const metadata:Metadata={

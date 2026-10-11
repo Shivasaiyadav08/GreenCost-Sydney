@@ -2,8 +2,8 @@
    GreenCost — design tokens
    The single source of truth. Every other stylesheet reads from here.
 
-   Structure derived from the editorial restraint of uiarc.dev/pro: a warm
-   off-white canvas, near-black ink, hairline borders, two shadow levels and
+   Structure derived from the editorial restraint of uiarc.dev/pro: a white
+   canvas, near-black ink, hairline borders, two shadow levels and
    a fixed radius scale. Brand identity is carried by one forest green.
 
    If a colour, radius, space or shadow is needed anywhere in the product,
@@ -12,12 +12,12 @@
 
 :root {
   /* --- Surfaces -----------------------------------------------------------
-     Warm neutrals (hue ~80, chroma ~.003) rather than pure grey. Pure white
-     reads clinical on screen; a warm off-white is easier for long sessions. */
-  --canvas: #f5f4f3;
+     White is the shared light-theme surface; hierarchy comes from spacing,
+     borders and accent colors rather than neutral gray fills. */
+  --canvas: #ffffff;
   --surface: #ffffff;
-  --raised: #eeedea;
-  --sunken: #e7e6e2;
+  --raised: #ffffff;
+  --sunken: #ffffff;
 
   /* --- Ink ---------------------------------------------------------------
      Three steps only. If a fourth is needed the hierarchy is wrong. */

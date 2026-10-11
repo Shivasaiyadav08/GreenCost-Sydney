@@ -1,0 +1,108 @@
+/* Light theme uses a single white base for page and neutral UI surfaces.
+   Keep semantic accents (selected, success, warning, error) and all dark-mode
+   colors intact; this only removes the old grey/green-grey panel fills. */
+:root:not([data-theme="dark"]) body,
+:root:not([data-theme="dark"]) .landing,
+:root:not([data-theme="dark"]) .compare-page,
+:root:not([data-theme="dark"]) .compare-page main,
+:root:not([data-theme="dark"]) .comparison-section,
+:root:not([data-theme="dark"]) .results,
+:root:not([data-theme="dark"]) .landing-footer {
+  background-color: #fff;
+}
+
+:root:not([data-theme="dark"]) .landing-evidence,
+:root:not([data-theme="dark"]) .closing-note,
+:root:not([data-theme="dark"]) .world-panel,
+:root:not([data-theme="dark"]) .form-topline,
+:root:not([data-theme="dark"]) .form-stepper,
+:root:not([data-theme="dark"]) .form-stepper button,
+:root:not([data-theme="dark"]) .agent-card,
+:root:not([data-theme="dark"]) .guide-card,
+:root:not([data-theme="dark"]) .terminal-section,
+:root:not([data-theme="dark"]) .apartment-occupancy,
+:root:not([data-theme="dark"]) .input-summary,
+:root:not([data-theme="dark"]) .rate-summary,
+:root:not([data-theme="dark"]) .budget-result,
+:root:not([data-theme="dark"]) .comparison-review,
+:root:not([data-theme="dark"]) .scope-note,
+:root:not([data-theme="dark"]) .confidence-note,
+:root:not([data-theme="dark"]) .research-result-note,
+:root:not([data-theme="dark"]) .supplier-results,
+:root:not([data-theme="dark"]) .chat-answer,
+:root:not([data-theme="dark"]) .notice,
+:root:not([data-theme="dark"]) .research-toggle,
+:root:not([data-theme="dark"]) .choice-row,
+:root:not([data-theme="dark"]) .segmented,
+:root:not([data-theme="dark"]) .form-note,
+:root:not([data-theme="dark"]) .explanation,
+:root:not([data-theme="dark"]) .primary-cost-grid > div,
+:root:not([data-theme="dark"]) .review-building,
+:root:not([data-theme="dark"]) .workflow-progress,
+:root:not([data-theme="dark"]) .projects-trigger,
+:root:not([data-theme="dark"]) .import-project,
+:root:not([data-theme="dark"]) .projects-panel,
+:root:not([data-theme="dark"]) .result-disclosure,
+:root:not([data-theme="dark"]) .chart-section,
+:root:not([data-theme="dark"]) .source-card,
+:root:not([data-theme="dark"]) .ask-section,
+:root:not([data-theme="dark"]) .formula,
+:root:not([data-theme="dark"]) .cost-line,
+:root:not([data-theme="dark"]) .form-details,
+:root:not([data-theme="dark"]) .assumption-card,
+:root:not([data-theme="dark"]) .assumption-feature-grid article,
+:root:not([data-theme="dark"]) .method-page .cost-formula,
+:root:not([data-theme="dark"]) .method-page .assumption-card,
+:root:not([data-theme="dark"]) .data-table th,
+:root:not([data-theme="dark"]) .recharts-default-tooltip,
+:root:not([data-theme="dark"]) .ui-empty-steps > span,
+:root:not([data-theme="dark"]) .ui-kbd,
+:root:not([data-theme="dark"]) .toast,
+:root:not([data-theme="dark"]) .provider-details .provider-row {
+  background-color: #fff !important;
+  background-image: none;
+}
+
+:root:not([data-theme="dark"]) .form-topline,
+:root:not([data-theme="dark"]) .form-stepper,
+:root:not([data-theme="dark"]) .agent-card,
+:root:not([data-theme="dark"]) .guide-card,
+:root:not([data-theme="dark"]) .scope-note,
+:root:not([data-theme="dark"]) .terminal-section,
+:root:not([data-theme="dark"]) .apartment-occupancy,
+:root:not([data-theme="dark"]) .cost-line,
+:root:not([data-theme="dark"]) .comparison-review,
+:root:not([data-theme="dark"]) .assumption-card,
+:root:not([data-theme="dark"]) .assumption-feature-grid article {
+  border-color: var(--gc-line);
+}
+
+:root:not([data-theme="dark"]) .world-panel {
+  border-color: var(--gc-line);
+}
+
+:root:not([data-theme="dark"]) .selected-features {
+  background: #fff !important;
+  color: var(--gc-text);
+}
+
+:root:not([data-theme="dark"]) .selected-features h4,
+:root:not([data-theme="dark"]) .selected-features button {
+  color: var(--gc-text);
+}
+
+:root:not([data-theme="dark"]) .form-stepper .active {
+  background: #fff;
+}
+
+:root:not([data-theme="dark"]) .form-stepper button:not(.active):not(.complete) span {
+  background: #fff;
+}
+
+:root:not([data-theme="dark"]) .form-stepper .active span {
+  background: var(--gc-accent);
+}
+
+:root:not([data-theme="dark"]) .world-panel {
+  background: #fff !important;
+}

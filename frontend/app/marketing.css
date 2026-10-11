@@ -1191,8 +1191,18 @@
 }
 
 @media (max-width: 860px) {
+  /* A solid sticky header scrolls more smoothly on mobile than a live blur. */
+  .gc-header {
+    backdrop-filter: none;
+    background-color: var(--canvas);
+  }
+
   .gc-nav {
     display: none;
+  }
+
+  .gc-close-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .gc-nav.is-open {
@@ -1243,6 +1253,10 @@
 }
 
 @media (max-width: 520px) {
+  .gc-header-actions > .gc-btn {
+    display: none;
+  }
+
   .gc-hero-actions .gc-btn {
     width: 100%;
   }

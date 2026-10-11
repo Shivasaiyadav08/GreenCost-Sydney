@@ -83,7 +83,7 @@ OPENROUTER_MODEL=openrouter/free
 GROQ_API_KEY=your-key
 GROQ_MODEL=openai/gpt-oss-20b
 GEMINI_API_KEY=your-key
-GEMINI_MODEL=gemini-2.5-flash
+GEMINI_MODEL=gemini-3.8-flash
 TAVILY_API_KEY=your-key
 TAVILY_DAILY_CAP=10
 TAVILY_MONTHLY_CAP=200
@@ -152,7 +152,7 @@ GROQ_DAILY_CAP=20
 GROQ_MONTHLY_CAP=400
 
 GEMINI_API_KEY=replace-with-your-gemini-key
-GEMINI_MODEL=gemini-2.5-flash
+GEMINI_MODEL=gemini-3.8-flash
 GEMINI_DAILY_CAP=20
 GEMINI_MONTHLY_CAP=400
 

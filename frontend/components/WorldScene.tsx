@@ -171,6 +171,7 @@ export default function WorldScene({floors = 2, solar = true}:{floors?:number; s
   const [visible, setVisible] = useState(true);
   const [night, setNight] = useState(false);
   const [paused, setPaused] = useState(false);
+  const [scrolling, setScrolling] = useState(false);
   const host = useRef<HTMLDivElement>(null);
 
   /* Capability and idle checks. Rendering stops when the panel scrolls away or
@@ -194,6 +195,23 @@ export default function WorldScene({floors = 2, solar = true}:{floors?:number; s
     };
   }, []);
 
+  /* Stop the animated WebGL scene during touch and wheel scrolling. The
+     controls resume as soon as scrolling settles, avoiding competition with
+     the browser's main-thread scroll work on phones. */
+  useEffect(()=>{
+    let scrollEnd: ReturnType<typeof setTimeout> | undefined;
+    const pauseWhileScrolling=()=>{
+      setScrolling(true);
+      if(scrollEnd) clearTimeout(scrollEnd);
+      scrollEnd=setTimeout(()=>setScrolling(false),180);
+    };
+    window.addEventListener('scroll',pauseWhileScrolling,{passive:true});
+    return ()=>{
+      window.removeEventListener('scroll',pauseWhileScrolling);
+      if(scrollEnd) clearTimeout(scrollEnd);
+    };
+  },[]);
+
   const storeys = Math.min(4, Math.max(1, Math.round(floors)));
 
   return (
@@ -201,9 +219,9 @@ export default function WorldScene({floors = 2, solar = true}:{floors?:number; s
       <Boundary>
         {supported ? (
           <Canvas
-            dpr={[1,1.75]}
+            dpr={[1,1.5]}
             shadows="soft"
-            frameloop={reduced || paused || !visible ? 'demand' : 'always'}
+            frameloop={reduced || paused || !visible || scrolling ? 'demand' : 'always'}
             camera={{position:[9.2,8.5,13.5], fov:36}}
             gl={{alpha:true, antialias:true, powerPreference:'low-power'}}
             role="img"

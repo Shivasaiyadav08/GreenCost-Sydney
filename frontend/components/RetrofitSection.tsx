@@ -2,11 +2,10 @@
 import dynamic from 'next/dynamic';
 
 /**
- * Section through a retrofitted home.
+ * Exterior view of a retrofitted home with a readable 2D section fallback.
  *
- * The 3D cutaway is the primary view; the 2D section drawing below is kept
- * verbatim as the fallback, so the measures are explained with or without
- * WebGL. Only this file changed — nothing else on the page was touched.
+ * The 3D exterior is the primary view; the 2D section drawing is the fallback
+ * so the measures remain clear with or without WebGL.
  */
 
 const RetrofitHouse3D = dynamic(()=>import('./RetrofitHouse3D'), {

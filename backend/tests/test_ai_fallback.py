@@ -12,6 +12,9 @@ def reply(text=TEXT):
 def keys(monkeypatch):
     for p in ai.PROVIDERS:
         monkeypatch.setenv(p.upper() + "_API_KEY", "test-key")
+    # Provider tests should not consume or depend on the user's daily quota.
+    monkeypatch.setattr(ai, "reserve", lambda provider: True)
+    monkeypatch.setattr(ai.gemini, "reserve", lambda provider: True)
 
 def test_first_success_does_not_call_backups(monkeypatch):
     keys(monkeypatch)
@@ -44,8 +47,8 @@ def test_invalid_second_response_reaches_third(monkeypatch):
         assert ai.generate("system", CONTEXT) == (TEXT, 3, "complete")
         assert request.call_count == 2
         gemini.assert_called_once()
-    assert ai.trace()["openrouter"] == "rejected_response"
-    assert ai.trace()["groq"] == "rejected_response"
+    assert ai.trace()["openrouter"] == "unsupported_numbers"
+    assert ai.trace()["groq"] == "invalid_citation"
     assert ai.trace()["explanation_provider"] == "gemini"
 
 
@@ -69,6 +72,14 @@ def test_invalid_citation_rejected():
     assert ai.usable(TEXT, CONTEXT)
 
 
+def test_bad_numeric_sentence_is_removed_without_losing_ai_answer(monkeypatch):
+    keys(monkeypatch)
+    mixed = "You save $999. Check the insulation details with your builder. [S1]"
+    with patch.object(ai.httpx, "post", return_value=reply(mixed)):
+        assert ai.generate("system", CONTEXT) == (
+            "Check the insulation details with your builder. [S1]", 1, "complete")
+
+
 def test_reasoning_models_leave_budget_for_final_answer(monkeypatch):
     keys(monkeypatch)
     monkeypatch.setenv("GROQ_MODEL", "openai/gpt-oss-20b")
@@ -80,7 +91,28 @@ def test_reasoning_models_leave_budget_for_final_answer(monkeypatch):
         assert payload["include_reasoning"] is False
         assert payload["max_tokens"] == 4096
         ai.chat("openrouter", "system", CONTEXT, 12)
-        assert request.call_args.kwargs["json"]["reasoning"] == {"effort": "low", "exclude": True}
+        assert request.call_args.kwargs["json"]["reasoning"] == {"effort": "low", "max_tokens": 512, "exclude": True}
+
+
+def test_blank_model_settings_use_provider_defaults(monkeypatch):
+    keys(monkeypatch)
+    for provider in ai.PROVIDERS:
+        monkeypatch.setenv(provider.upper() + "_MODEL", "")
+    with patch.object(ai.httpx, "post", return_value=reply()) as request:
+        ai.chat("openrouter", "system", CONTEXT, 12)
+        assert request.call_args.kwargs["json"]["model"] == "openrouter/free"
+        ai.chat("groq", "system", CONTEXT, 12)
+        assert request.call_args.kwargs["json"]["model"] == "openai/gpt-oss-20b"
+
+
+def test_blank_gemini_model_uses_default(monkeypatch):
+    keys(monkeypatch)
+    monkeypatch.setenv("GEMINI_MODEL", "")
+    response = httpx.Response(200, request=httpx.Request("POST", "https://generativelanguage.googleapis.com"),
+                              json={"candidates": [{"content": {"parts": [{"text": TEXT}]}}]})
+    with patch.object(ai.gemini.httpx, "post", return_value=response) as request:
+        assert ai.gemini.generate("system", CONTEXT) == (TEXT, 1, "complete")
+    assert "/gemini-3.8-flash:generateContent" in request.call_args.args[0]
 
 
 def test_other_groq_models_do_not_receive_unsupported_reasoning_setting(monkeypatch):
@@ -97,7 +129,9 @@ def test_workflow_reports_openrouter_success_without_calling_backups(monkeypatch
     from backend.app.main import app
     keys(monkeypatch)
     client = TestClient(app)
-    with patch.object(ai.gemini, "generate") as gemini, patch.object(ai.httpx, "post", return_value=reply()) as request:
+    with patch("backend.app.agent.workflow.research", return_value=([], 0, "not_configured")), \
+         patch.object(ai.gemini, "generate") as gemini, \
+         patch.object(ai.httpx, "post", return_value=reply()) as request:
         result = client.post("/api/analyse", json=client.get("/api/demo").json()).json()
         assert request.call_count == 1
     gemini.assert_not_called()
@@ -106,6 +140,34 @@ def test_workflow_reports_openrouter_success_without_calling_backups(monkeypatch
     assert result["research_status"]["openrouter"] == "complete"
     assert result["research_status"]["explanation_provider"] == "openrouter"
     assert result["periods"]["40"]["explanation"][-1] == TEXT
+
+
+def test_all_provider_failures_keep_python_calculated_explanation(monkeypatch):
+    from backend.app.services.explanation import explain
+    keys(monkeypatch)
+    failure = httpx.Response(429, request=httpx.Request("POST", "https://provider.test"))
+    with patch.object(ai.gemini, "generate", return_value=(None, 1, "quota_reached")), \
+         patch.object(ai.httpx, "post", side_effect=[failure, failure]) as request:
+        explanation, calls, status = explain({
+            "component_savings": {"insulation": 100},
+            "savings_aud": 100,
+            "years": 40,
+            "sustainable": {"total_lcc": 900},
+            "conventional": {"total_lcc": 1000},
+            "capital_difference": 50,
+            "break_even_year": 10,
+            "reversal_years": [],
+        }, evidence=[])
+
+    assert request.call_count == 2
+    assert calls == 3
+    assert status == "quota_reached"
+    assert len(explanation) == 4
+    assert "AUD $1,000" in explanation[0]
+    assert ai.trace()["explanation_provider"] == "calculated"
+    assert ai.trace()["openrouter"] == "quota_reached"
+    assert ai.trace()["groq"] == "quota_reached"
+    assert ai.trace()["gemini"] == "quota_reached"
 
 
 def test_timeout_and_empty_backups_finish_with_calculated_fallback(monkeypatch):
