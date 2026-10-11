@@ -82,7 +82,7 @@ def test_gemini_invented_money_rejected():
         "httpx.post", return_value=response({"candidates": [{"content": {"parts": [{"text": "You will save $999999."}]}}]})
     ):
         result = client.post("/api/analyse", json=demo()).json()
-    assert result["research_status"]["gemini"] == "rejected_response"
+    assert result["research_status"]["gemini"] == "unsupported_numbers"
     assert len(result["periods"]["40"]["explanation"]) == 4
 
 
