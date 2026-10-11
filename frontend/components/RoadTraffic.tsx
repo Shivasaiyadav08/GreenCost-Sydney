@@ -2,6 +2,7 @@
 import {useRef} from 'react';
 import {useFrame} from '@react-three/fiber';
 import * as THREE from 'three';
+import type {ScenePalette} from '@/lib/scene-palette';
 
 type Point = [number, number, number];
 const STREET_STRAIGHT=5.6,STREET_RADIUS=.28;
@@ -25,11 +26,11 @@ function Bar({from,to,color,radius=.018}:{from:Point;to:Point;color:string;radiu
  const orientation=new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),delta.clone().normalize());
  return <mesh position={start.add(end).multiplyScalar(.5)} quaternion={orientation}><cylinderGeometry args={[radius,radius,delta.length(),6]}/><meshStandardMaterial color={color}/></mesh>;
 }
-function Car({reduced}:{reduced:boolean}){
+function Car({reduced,palette}:{reduced:boolean;palette:ScenePalette}){
  const car=useRef<THREE.Group>(null),wheels=useRef<THREE.Group>(null),elapsed=useRef(0);
  useFrame((_,delta)=>{if(reduced)return;elapsed.current+=Math.min(delta,.1);const time=elapsed.current;if(car.current){const [x,z,turn]=streetPosition(time*.58+1.3);car.current.position.set(x,.15,z);car.current.rotation.y=turn;}if(wheels.current)wheels.current.children.forEach(wheel=>{wheel.rotation.z=-time*3.4;});});
  return <group ref={car} position={[-1.5,.15,3.65]}>
-  <Block at={[0,.25,0]} size={[1.2,.26,.54]} color="#557c70"/>
+  <Block at={[0,.25,0]} size={[1.2,.26,.54]} color={palette.glass}/>
   <Block at={[-.12,.46,0]} size={[.65,.28,.47]} color="#e2e8de"/>
   <Block at={[-.12,.48,.244]} size={[.56,.18,.014]} color="#344f56"/>
   <Block at={[-.12,.48,-.244]} size={[.56,.18,.014]} color="#344f56"/>
@@ -55,16 +56,16 @@ function Bicycle({reduced}:{reduced:boolean}){
   {[-.06,.06].map(z=><group key={z}><Bar from={[0,.83,z]} to={[.25,.66,z]} color="#cda882" radius={.025}/><Bar from={[-.1,.61,z]} to={[.12,.4,z]} color="#4c5d54" radius={.034}/><Bar from={[.12,.4,z]} to={[0,.16,z]} color="#4c5d54" radius={.03}/></group>)}
  </group>;
 }
-export default function RoadTraffic({reduced,night}:{reduced:boolean;night:boolean}){
+export default function RoadTraffic({reduced,night,palette}:{reduced:boolean;night:boolean;palette:ScenePalette}){
  return <group>
-  <Block at={[0,.08,3.9]} size={[7.65,.1,1.65]} color="#8b9690"/>
-  <Block at={[0,.12,3]} size={[7.65,.15,.17]} color="#e1e5da"/>
-  <Block at={[0,.12,4.8]} size={[7.65,.15,.17]} color="#e1e5da"/>
-  <Block at={[0,.08,5.4]} size={[7.65,.1,.9]} color="#aec4a9"/>
+  <Block at={[0,.08,3.9]} size={[7.65,.1,1.65]} color={palette.road}/>
+  <Block at={[0,.12,3]} size={[7.65,.15,.17]} color={palette.roadMark}/>
+  <Block at={[0,.12,4.8]} size={[7.65,.15,.17]} color={palette.roadMark}/>
+  <Block at={[0,.08,5.4]} size={[7.65,.1,.9]} color={palette.lawn}/>
   <Block at={[0,.12,5.92]} size={[7.65,.15,.12]} color="#e1e5da"/>
-  <Block at={[0,.11,6.06]} size={[7.65,.13,.16]} color="#d7ddcf"/>
-  {[-2,0,2].map(x=><Block key={`cycle:${x}`} at={[x,.137,5.4]} size={[.26,.012,.025]} color="#edf3e6"/>)}
-  {[-3,-2,-1,0,1,2,3].map(x=><Block key={x} at={[x,.137,3.96]} size={[.45,.012,.035]} color="#eee9dc"/>)}
-  <group visible={!night}><Car reduced={reduced||night}/><Bicycle reduced={reduced||night}/></group>
+  <Block at={[0,.11,6.06]} size={[7.65,.13,.16]} color={palette.roadMark}/>
+  {[-2,0,2].map(x=><Block key={`cycle:${x}`} at={[x,.137,5.4]} size={[.26,.012,.025]} color={palette.roadMark}/>)}
+  {[-3,-2,-1,0,1,2,3].map(x=><Block key={x} at={[x,.137,3.96]} size={[.45,.012,.035]} color={palette.roadMark}/>)}
+  <group visible={!night}><Car reduced={reduced||night} palette={palette}/><Bicycle reduced={reduced||night}/></group>
  </group>;
 }

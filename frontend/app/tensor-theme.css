@@ -1,30 +1,9 @@
 /* TensorTonic-inspired colour and type system, shared by every GreenCost route. */
-:root {
- --gc-bg:#eae9e0; --gc-surface:#ffffff; --gc-inset:#e3e2d6; --gc-raised:#ffffff;
- --gc-text:#1f261f; --gc-muted:#49514a; --gc-line:#bcc2b0;
- --gc-accent:#00753e; --gc-accent-hover:#005d31; --gc-accent-soft:#e3f0e6; --gc-on-accent:#fffdf5;
- --gc-warning:#8a4b20; --gc-warning-bg:#fff0df; --gc-warning-line:#e6c7a3;
- --gc-error:#ad382f; --gc-error-bg:#fff1ee; --gc-error-line:#e6b9b2;
- --gc-negative:#9e473a; --gc-negative-bg:#fae9e3;
- --gc-shadow:0 12px 32px #2228201a;
- color-scheme:light;
-}
-:root[data-theme=dark] {
- --gc-bg:#0a0a0a; --gc-surface:#111511; --gc-inset:#1c2119; --gc-raised:#151815;
- --gc-text:#f7f7f2; --gc-muted:#a5ada1; --gc-line:#30382e;
- --gc-accent:#98c56e; --gc-accent-hover:#b1d591; --gc-accent-soft:#1d2e22; --gc-on-accent:#0a170e;
- --gc-warning:#edb584; --gc-warning-bg:#302216; --gc-warning-line:#68462d;
- --gc-error:#f49d91; --gc-error-bg:#321d1a; --gc-error-line:#77443c;
- --gc-negative:#efa493; --gc-negative-bg:#342019;
- --gc-shadow:0 10px 30px #00000030;
- color-scheme:dark;
-}
-:root,.landing,.method-page {
- --paper:var(--gc-bg); --ink:var(--gc-text); --muted:var(--gc-muted); --line:var(--gc-line);
- --green:var(--gc-accent); --forest:var(--gc-accent); --pale:var(--gc-accent-soft);
- --ui-forest:var(--gc-accent); --ui-forest-dark:var(--gc-accent-hover); --ui-mint:var(--gc-accent-soft);
- --ui-border:var(--gc-line); --ui-text:var(--gc-text); --ui-muted:var(--gc-muted); --ui-shadow:var(--gc-shadow);
-}
+/* Colour and type now resolve through tokens.css. The palette, both themes and
+   the legacy-name alias layer that used to live here have moved there, so this
+   file only carries component rules. */
+:root { color-scheme: light; }
+:root[data-theme=dark] { color-scheme: dark; }
 body,.landing,.compare-page,.compare-page main,.landing.compare-page .comparison-section,.inline-results,.landing-footer {
  background:var(--gc-bg); color:var(--gc-text);
 }

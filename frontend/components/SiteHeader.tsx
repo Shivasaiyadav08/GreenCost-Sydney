@@ -1,10 +1,62 @@
 'use client';
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
-import {useRef,useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import {ArrowUpRight,Layers3,Menu,X} from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
+
+const LINKS = [
+  {href:'/#how-it-works', label:'How it works', match:false},
+  {href:'/compare', label:'Compare', match:'/compare'},
+  {href:'/methodology', label:'Method & evidence', match:'/methodology'},
+] as const;
+
 export default function SiteHeader({compare=false}:{compare?:boolean}){
- const path=usePathname(),[open,setOpen]=useState(false),menuButton=useRef<HTMLButtonElement>(null);
- return <header className="landing-header" onKeyDown={event=>{if(event.key==='Escape'&&open){setOpen(false);menuButton.current?.focus();}}}><Link href="/" className="landing-brand" aria-label="GreenCost home"><span><Layers3 size={24}/></span><b>greencost</b></Link><nav id="site-navigation" className={open?'is-open':''} aria-label="Main navigation"><Link href="/#how-it-works" onClick={()=>setOpen(false)}>How it works</Link><Link href="/compare" aria-current={path==='/compare'?'page':undefined} onClick={()=>setOpen(false)}>Compare</Link><Link href="/methodology" aria-current={path==='/methodology'?'page':undefined} onClick={()=>setOpen(false)}>Method & evidence</Link></nav><div className="header-actions"><ThemeToggle/><Link href="/compare" className="header-cta">{compare?'Your comparison':'Start comparison'} <ArrowUpRight size={15}/></Link><button ref={menuButton} type="button" className="navigation-toggle" aria-label={open?'Close navigation':'Open navigation'} aria-expanded={open} aria-controls="site-navigation" onClick={()=>setOpen(!open)}>{open?<X size={20}/>:<Menu size={20}/>}</button></div></header>;
+  const path = usePathname();
+  const [open, setOpen] = useState(false);
+  const trigger = useRef<HTMLButtonElement>(null);
+
+  useEffect(()=>{ setOpen(false); }, [path]);
+
+  useEffect(()=>{
+    if(!open) return;
+    const onKey = (e:KeyboardEvent)=>{ if(e.key==='Escape'){ setOpen(false); trigger.current?.focus(); } };
+    window.addEventListener('keydown', onKey);
+    return ()=> window.removeEventListener('keydown', onKey);
+  }, [open]);
+
+  return (
+    <header className="gc-header">
+      <div className="gc-shell gc-header-row">
+        <Link href="/" className="gc-brand" aria-label="GreenCost home">
+          <span className="gc-brand-mark" aria-hidden="true"><Layers3 size={17}/></span>
+          <span className="gc-brand-word">greencost</span>
+        </Link>
+
+        <nav id="site-navigation" className={open?'gc-nav is-open':'gc-nav'} aria-label="Main">
+          {LINKS.map(l=>(
+            <Link key={l.href} href={l.href}
+              aria-current={l.match && path===l.match ? 'page' : undefined}
+              onClick={()=>setOpen(false)}>
+              {l.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="gc-header-actions">
+          <ThemeToggle/>
+          <Link href="/compare" className="gc-btn gc-btn-primary gc-btn-sm">
+            {compare ? 'Your comparison' : 'Start comparison'}
+            <ArrowUpRight size={14}/>
+          </Link>
+          <button ref={trigger} type="button" className="gc-burger"
+            aria-label={open ? 'Close navigation' : 'Open navigation'}
+            aria-expanded={open} aria-controls="site-navigation"
+            onClick={()=>setOpen(o=>!o)}>
+            {open ? <X size={18}/> : <Menu size={18}/>}
+          </button>
+        </div>
+      </div>
+    </header>
+  );
 }

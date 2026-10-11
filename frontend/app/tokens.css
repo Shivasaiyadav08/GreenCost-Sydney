@@ -1,0 +1,318 @@
+/* ==========================================================================
+   GreenCost — design tokens
+   The single source of truth. Every other stylesheet reads from here.
+
+   Structure derived from the editorial restraint of uiarc.dev/pro: a warm
+   off-white canvas, near-black ink, hairline borders, two shadow levels and
+   a fixed radius scale. Brand identity is carried by one forest green.
+
+   If a colour, radius, space or shadow is needed anywhere in the product,
+   add it here first. Never define a raw hex in a component stylesheet.
+   ========================================================================== */
+
+:root {
+  /* --- Surfaces -----------------------------------------------------------
+     Warm neutrals (hue ~80, chroma ~.003) rather than pure grey. Pure white
+     reads clinical on screen; a warm off-white is easier for long sessions. */
+  --canvas: #f5f4f3;
+  --surface: #ffffff;
+  --raised: #eeedea;
+  --sunken: #e7e6e2;
+
+  /* --- Ink ---------------------------------------------------------------
+     Three steps only. If a fourth is needed the hierarchy is wrong. */
+  --ink: #141211;
+  --ink-2: #55534e;
+  /* --ink-3 is tertiary text (captions, meta, eyebrows) so it carries the
+     smallest sizes on the page. Both values clear 4.5:1 against their own
+     canvas; #86837c did not, and was the page's only contrast failure. */
+--ink-3: #6e6b64;
+
+  /* Legacy name kept because six older stylesheets read it. Same role as
+     --ink-2: secondary body text. */
+  --muted: var(--ink-2);
+
+  /* --- Brand ------------------------------------------------------------- */
+  /* Lighter and more chromatic than a typical "forest" green.
+
+     The previous #164a37 sat at luminance 0.053 against near-black ink at
+     0.006. Only ~8x apart, and desaturated at that darkness, so green text
+     beside black read as "dark text with a tint" rather than as green — most
+     obvious on the hero wordmark and the small green icons in the evidence
+     strip. This clears 5.9:1 on the canvas and 6.5:1 for white on green. */
+  --forest: #1d6a4b;
+  --forest-hover: #154e38;
+  --forest-ink: #ffffff;
+  --mint: #e6f0e9;
+  --mint-line: #c2dacb;
+
+  /* --- Feedback ----------------------------------------------------------
+     Status colours are reserved for status. Never use them decoratively. */
+  --positive: #2f6b4f;
+  --caution: #8a6a1f;
+  --critical: #9b3a2e;
+  --info: #2f5a86;
+
+  /* --- Lines ------------------------------------------------------------
+     0.5px hairlines. A 1px border at these densities reads heavy and makes
+     neighbouring cards look unrelated. */
+  --line: rgba(20, 18, 17, 0.1);
+  --line-strong: rgba(20, 18, 17, 0.18);
+  --hair: 0.5px solid var(--line);
+  --hair-strong: 0.5px solid var(--line-strong);
+
+  /* --- Type -------------------------------------------------------------- */
+  --font-display: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --font-body: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Display scale — fluid, so headings hold their shape from 360 to 1920. */
+  --t-hero: clamp(40px, 7.2vw, 92px);
+  --t-h1: clamp(32px, 4.6vw, 56px);
+  --t-h2: clamp(26px, 3.1vw, 38px);
+  --t-h3: clamp(19px, 1.7vw, 23px);
+  --t-lead: clamp(16px, 1.35vw, 19px);
+  --t-body: 15px;
+  --t-ui: 14px;
+  --t-small: 13px;
+  --t-meta: 12px;
+  --t-eyebrow: 11px;
+
+  --track-display: -0.025em;
+  --track-body: -0.011em;
+  --track-eyebrow: 0.14em;
+
+  --lead-display: 1.02;
+  --lead-head: 1.14;
+  --lead-body: 1.62;
+  --lead-tight: 1.4;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+
+  /* --- Space -------------------------------------------------------------
+     A 4px base. Every margin and pad is a multiple of this, which is what
+     makes an unrelated page feel like it belongs to the same product. */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+  --s-9: 96px;
+  --s-10: 128px;
+
+  /* Vertical rhythm between page sections. */
+  /* Vertical rhythm between page sections. 8vw reached 116px on a wide
+     viewport, which stacked with each block's own padding into roughly 160px
+     of air above a heading. 88px still separates sections clearly. */
+  --section: clamp(56px, 6vw, 88px);
+  --gutter: clamp(20px, 5vw, 72px);
+  --measure: 66ch;
+  --page-max: 1360px;
+
+  /* --- Radius ------------------------------------------------------------
+     Four values. Anything outside this scale is arbitrary. */
+  --r-control: 6px;
+  --r-card: 10px;
+  --r-panel: 14px;
+  --r-pill: 999px;
+
+  /* --- Elevation ---------------------------------------------------------
+     Two levels, resting and raised. A third level is decoration. */
+  --shadow-rest: 0 1px 2px rgba(20, 18, 17, 0.04);
+  --shadow-raise: 0 1px 2px rgba(20, 18, 17, 0.05),
+    0 10px 28px -14px rgba(20, 18, 17, 0.22);
+
+  /* --- Motion ------------------------------------------------------------ */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-exit: cubic-bezier(0.7, 0, 0.84, 0);
+  --t-fast: 140ms;
+  --t-base: 220ms;
+  --t-slow: 420ms;
+
+  --focus: 2px solid var(--forest);
+  --focus-offset: 3px;
+}
+
+/* --- Dark ----------------------------------------------------------------
+   Not an inversion. The canvas keeps a trace of warmth, the green lifts to
+   hold its contrast, and the ink becomes a soft off-white rather than pure.
+   ------------------------------------------------------------------------ */
+:root[data-theme="dark"] {
+  --canvas: #1a1a19;
+  --surface: #212120;
+  --raised: #2a2a28;
+  --sunken: #141413;
+
+  --ink: #f2f1ee;
+  --ink-2: #a8a49c;
+  --ink-3: #8b8880;
+  --muted: var(--ink-2);
+
+  --forest: #5cae8c;
+  --forest-hover: #74c1a0;
+  --forest-ink: #0d1512;
+  --mint: rgba(92, 174, 140, 0.14);
+  --mint-line: rgba(92, 174, 140, 0.3);
+
+  --positive: #5cae8c;
+  --caution: #c9a44a;
+  --critical: #d98070;
+  --info: #7aa8d8;
+
+  --line: rgba(242, 241, 238, 0.12);
+  --line-strong: rgba(242, 241, 238, 0.22);
+
+  --shadow-rest: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-raise: 0 1px 2px rgba(0, 0, 0, 0.35),
+    0 10px 28px -14px rgba(0, 0, 0, 0.6);
+}
+
+/* --- Legacy alias layer ---------------------------------------------------
+   Six earlier stylesheets still reference tokens by their original names.
+   Rather than rewriting all of them, those names are resolved here, once, to
+   the palette above. Any rule that reads `var(--paper)` now gets the warm
+   canvas whether it lives in globals.css or tensor-theme.css.
+
+   This block is the reason the older files can stay in place without
+   reintroducing the six-way colour conflict they were built with. Nothing
+   downstream should define these names again.
+   ------------------------------------------------------------------------ */
+:root {
+  /* Original GreenCost names. --ink, --muted, --line and --forest already
+     carry their new values from the block above, so they are deliberately not
+     re-declared here — a self-referential declaration would invalidate the
+     token and silently fall back to inherited colour. */
+  --paper: var(--canvas);
+  --pale: var(--raised);
+  --green: var(--forest);
+  --taupe: var(--ink-3);
+  --rust: var(--critical);
+
+  /* tensor-theme.css scale */
+  --gc-bg: var(--canvas);
+  --gc-surface: var(--surface);
+  --gc-inset: var(--sunken);
+  --gc-raised: var(--raised);
+  --gc-text: var(--ink);
+  --gc-muted: var(--ink-2);
+  --gc-line: var(--line-strong);
+  --gc-accent: var(--forest);
+  --gc-accent-hover: var(--forest-hover);
+  --gc-accent-soft: var(--mint);
+  --gc-on-accent: var(--forest-ink);
+  --gc-warning: var(--caution);
+  --gc-warning-bg: color-mix(in srgb, var(--caution) 12%, var(--surface));
+  --gc-warning-line: color-mix(in srgb, var(--caution) 32%, var(--surface));
+  --gc-error: var(--critical);
+  --gc-error-bg: color-mix(in srgb, var(--critical) 10%, var(--surface));
+  --gc-error-line: color-mix(in srgb, var(--critical) 30%, var(--surface));
+  --gc-negative: var(--critical);
+  --gc-negative-bg: color-mix(in srgb, var(--critical) 14%, var(--surface));
+  --gc-shadow: var(--shadow-raise);
+
+  /* component-refresh.css scale */
+  --ui-forest: var(--forest);
+  --ui-forest-dark: var(--forest-hover);
+  --ui-mint: var(--mint);
+  --ui-border: var(--line);
+  --ui-text: var(--ink);
+  --ui-muted: var(--ink-2);
+  --ui-shadow: var(--shadow-raise);
+  --ui-ease: var(--ease);
+}
+
+/* --------------------------------------------------------------------------
+   Base reset
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--t-body);
+  line-height: var(--lead-body);
+  letter-spacing: var(--track-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* No transition on the page background or ink.
+
+     The canvas cross-faded over --t-base while sections that paint their own
+     background switched instantly, so for ~200ms after a theme change the
+     worked-example band went black while everything above it stayed light —
+     a hard horizontal tear down the page. Toggling the theme is instant
+     instead, which also avoids a full-page repaint mid-fade. */
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+figure {
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-weight: var(--weight-regular);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+:focus-visible {
+  outline: var(--focus);
+  outline-offset: var(--focus-offset);
+  border-radius: var(--r-control);
+}
+
+::selection {
+  background: var(--forest);
+  color: var(--forest-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

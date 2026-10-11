@@ -1,6 +1,9 @@
 /* Client refresh: reference-led typography, calm surfaces and visible state. */
-:root{--font-sans:Inter,Arial,sans-serif;--ink:#18201d;--muted:#57615c;--line:#e4e8e5}
-body{font-family:Inter,Arial,sans-serif;background:#fafbf9;color:#18201d}
+/* Palette and page background resolve through tokens.css. This sheet used to
+   set `body{background:#fafbf9;color:#18201d}` with literal light values,
+   which pinned the page to the light theme in dark mode while sections that
+   painted the canvas token correctly went dark. Only the typeface is kept. */
+body{font-family:Inter,Arial,sans-serif}
 button,input,select,textarea{font:inherit}
 .landing{--paper:#fafbf9;--forest:#164a37;--ink:#18201d;--muted:#57615c;--line:#e4e8e5;overflow:visible}
 .landing h1,.landing h2,.landing h3,.standalone h1,.standalone h2,.results h1,.results h2{font-family:Inter,Arial,sans-serif!important;font-weight:600;letter-spacing:-.04em;color:var(--ink)}

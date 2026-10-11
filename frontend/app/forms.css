@@ -1,0 +1,217 @@
+/* ==========================================================================
+   GreenCost — form layout
+   Loaded last so it settles the field grid after the older refresh sheets.
+
+   Scope is deliberately narrow: the vertical rhythm of a field, so that two
+   fields sitting side by side line up regardless of whether their labels wrap.
+   Colour and component styling for the form still lives where it always has.
+   ========================================================================== */
+
+/* Reserve two lines for every label.
+
+   A label is free text: "Postcode" is one line, "Project name (optional)" is
+   two. In a flex column that difference pushed the control below it out of
+   line with its neighbour, so two inputs in a row sat at different heights.
+   Fixing the label block height fixes every row underneath it at once.
+
+   This is deliberately unconditional rather than behind a media or container
+   query. The five earlier stylesheets collapse this grid to one column at five
+   different viewport widths, and a query at any of those widths will disagree
+   with at least one of them — which reintroduces the misalignment on some
+   device. A reserved line costs a little space and is always correct. */
+.field > .field-label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  min-height: calc(2 * var(--t-ui) * 1.45);
+}
+
+.field > .field-label > label {
+  flex: 1 1 auto;
+  min-width: 0;
+  line-height: 1.45;
+}
+
+/* Hold the info trigger on the first line rather than floating it to the
+   vertical middle of a two-line block. */
+.field > .field-label > .field-help {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  margin-top: 1px;
+}
+
+.field > .field-label > .field-help > button {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  transition: background var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease);
+}
+
+.field > .field-label > .field-help > button:hover,
+.field > .field-label > .field-help > button[aria-expanded="true"] {
+  background: var(--mint);
+  color: var(--forest);
+}
+
+.field > small {
+  line-height: 1.55;
+}
+
+/* A field spanning the full grid width has no neighbour to align with, so the
+   reserved second line would be dead space rather than alignment. */
+.field:has(.building-choices) > .field-label {
+  min-height: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Retrofit section drawing
+   Sits beside the empty comparison state so that area carries a diagram
+   rather than blank space. Line art only: hairlines, no fills, so it reads
+   as a drawing rather than an illustration.
+   -------------------------------------------------------------------------- */
+.result-empty .gc-section-diagram {
+  margin: var(--s-7) 0 0;
+  padding-top: var(--s-5);
+  border-top: var(--hair);
+  max-width: 520px;
+}
+
+.gc-section-diagram svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.gc-section-diagram .rs-ground,
+.gc-section-diagram .rs-shell {
+  stroke: var(--ink-2);
+  stroke-width: 1.1;
+  fill: none;
+  stroke-linejoin: round;
+}
+
+.gc-section-diagram .rs-hatch line {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+
+.gc-section-diagram .rs-glass {
+  fill: var(--mint);
+  stroke: var(--ink-2);
+  stroke-width: 1;
+}
+
+.gc-section-diagram .rs-panel path {
+  fill: var(--mint);
+  stroke: var(--forest);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+
+.gc-section-diagram .rs-tank {
+  fill: none;
+  stroke: var(--ink-2);
+  stroke-width: 1.1;
+}
+
+.gc-section-diagram .rs-callout line {
+  stroke: var(--line-strong);
+  stroke-width: 0.8;
+}
+
+.gc-section-diagram .rs-callout circle {
+  fill: var(--forest);
+}
+
+.gc-section-diagram .rs-callout text {
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  fill: var(--ink-2);
+  letter-spacing: 0.005em;
+}
+
+.gc-section-diagram-note {
+  margin-top: var(--s-4);
+  font-size: var(--t-meta);
+  color: var(--ink-3);
+}
+
+/* Side by side once there is room; stacked below that. */
+@media (min-width: 860px) {
+  .result-empty.is-compact,
+  .result-empty {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: clamp(32px, 4vw, 64px);
+    align-items: start;
+  }
+
+  .result-empty > h2,
+  .result-empty > p,
+  .result-empty > .ui-empty-steps,
+  .result-empty > .ui-empty-buttons {
+    grid-column: 1;
+  }
+
+  .result-empty > .gc-section-diagram {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+    align-self: center;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Area control
+   The unit selector is a fixed 108px inside a field roughly 170px wide, which
+   leaves the number input about 60px — too narrow to read a figure and edit
+   it. Earlier sheets set 88px and then widened it; this settles on a width
+   that fits "m²" plus the chevron and gives the rest to the input.
+   -------------------------------------------------------------------------- */
+.area-control {
+  display: flex;
+  gap: 0;
+}
+
+.area-control input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border-radius: var(--r-control) 0 0 var(--r-control) !important;
+}
+
+.area-control .ui-select {
+  flex: 0 0 78px;
+  width: 78px;
+}
+
+.area-control .ui-select-trigger {
+  width: 100%;
+  height: 100%;
+  gap: var(--s-2);
+  padding: 0 10px;
+  border-left: var(--hair);
+  border-radius: 0 var(--r-control) var(--r-control) 0 !important;
+}
+
+/* Keep the unit label from being squeezed to nothing by the chevron.
+
+   The chevron carries a circular badge that is 32px on its own. In a full
+   width select that reads as an affordance; inside this 78px composite it
+   leaves the "m²" label about 12px, which clips the superscript. */
+.area-control .ui-select-trigger > svg {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  padding: 3px;
+}
+
+.area-control .ui-select-trigger > span {
+  flex: 0 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+}

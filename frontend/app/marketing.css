@@ -1,0 +1,1259 @@
+/* ==========================================================================
+   GreenCost — marketing surface
+   Styles the public pages only. Every selector is namespaced under `gc-` so
+   nothing here can reach the calculator in globals.css, and nothing in
+   globals.css can reach in here.
+
+   Composition rules used throughout:
+     · hairline borders, never 1px
+     · one shadow level per state, never stacked shadows
+     · spacing is always a multiple of --s-*
+     · colour only ever comes from a token
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Page frame
+   -------------------------------------------------------------------------- */
+.gc {
+  background: var(--canvas);
+  color: var(--ink);
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.gc-shell {
+  width: 100%;
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.gc-skip {
+  position: absolute;
+  left: var(--gutter);
+  top: var(--s-4);
+  z-index: 60;
+  transform: translateY(-160%);
+  background: var(--ink);
+  color: var(--canvas);
+  padding: var(--s-2) var(--s-4);
+  border-radius: var(--r-control);
+  font-size: var(--t-small);
+  transition: transform var(--t-fast) var(--ease);
+}
+
+.gc-skip:focus-visible {
+  transform: translateY(0);
+}
+
+/* --------------------------------------------------------------------------
+   Header
+   -------------------------------------------------------------------------- */
+.gc-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: color-mix(in srgb, var(--canvas) 86%, transparent);
+  backdrop-filter: saturate(1.4) blur(14px);
+  border-bottom: var(--hair);
+}
+
+.gc-header-row {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: var(--s-6);
+}
+
+.gc-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  flex-shrink: 0;
+}
+
+.gc-brand-mark {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-control);
+  background: var(--forest);
+  color: var(--forest-ink);
+}
+
+.gc-brand-word {
+  font-size: 17px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.02em;
+}
+
+.gc-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--s-5);
+  margin-left: var(--s-4);
+  font-size: var(--t-ui);
+  color: var(--ink-2);
+}
+
+.gc-nav a {
+  position: relative;
+  padding-block: var(--s-1);
+  transition: color var(--t-fast) var(--ease);
+}
+
+.gc-nav a:hover {
+  color: var(--ink);
+}
+
+.gc-nav a[aria-current="page"] {
+  color: var(--ink);
+}
+
+.gc-nav a[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 1px;
+  background: var(--ink);
+}
+
+.gc-header-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+/* --------------------------------------------------------------------------
+   Buttons
+   -------------------------------------------------------------------------- */
+.gc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  height: 40px;
+  padding-inline: var(--s-5);
+  border-radius: var(--r-pill);
+  font-size: var(--t-ui);
+  font-weight: var(--weight-medium);
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  border: var(--hair);
+  transition: background var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease);
+}
+
+.gc-btn svg {
+  transition: transform var(--t-base) var(--ease);
+}
+
+.gc-btn-primary {
+  background: var(--ink);
+  color: var(--canvas);
+  border-color: var(--ink);
+}
+
+.gc-btn-primary:hover {
+  background: var(--forest);
+  border-color: var(--forest);
+}
+
+.gc-btn-primary:hover svg {
+  transform: translate(2px, -2px);
+}
+
+.gc-btn-quiet {
+  background: transparent;
+  color: var(--ink-2);
+}
+
+.gc-btn-quiet:hover {
+  color: var(--ink);
+  border-color: var(--line-strong);
+  background: var(--surface);
+}
+
+.gc-btn-sm {
+  height: 34px;
+  padding-inline: var(--s-4);
+  font-size: var(--t-small);
+}
+
+.gc-burger {
+  display: none;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: var(--r-control);
+  border: var(--hair);
+}
+
+/* --------------------------------------------------------------------------
+   Hero
+   -------------------------------------------------------------------------- */
+.gc-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.02fr);
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+  padding-block: clamp(48px, 7vw, 104px) clamp(56px, 8vw, 120px);
+}
+
+.gc-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  font-size: var(--t-eyebrow);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.gc-eyebrow::before {
+  content: "";
+  width: 22px;
+  height: 1px;
+  background: var(--line-strong);
+}
+
+.gc-hero h1 {
+  margin-top: var(--s-5);
+  font-family: var(--font-display);
+  font-size: var(--t-hero);
+  line-height: var(--lead-display);
+  letter-spacing: var(--track-display);
+  text-wrap: balance;
+}
+
+.gc-hero h1 em {
+  font-style: italic;
+  color: var(--forest);
+}
+
+.gc-hero-lede {
+  margin-top: var(--s-5);
+  font-size: var(--t-lead);
+  line-height: var(--lead-tight);
+  color: var(--ink);
+  max-width: 30ch;
+}
+
+.gc-hero-body {
+  margin-top: var(--s-3);
+  font-size: var(--t-body);
+  color: var(--ink-2);
+  max-width: var(--measure);
+}
+
+.gc-hero-actions {
+  margin-top: var(--s-6);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.gc-trust {
+  margin-top: var(--s-7);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-5);
+  padding-top: var(--s-5);
+  border-top: var(--hair);
+  font-size: var(--t-small);
+  color: var(--ink-3);
+  max-width: 460px;
+}
+
+.gc-trust span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.gc-trust svg {
+  color: var(--forest);
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Building panel
+   -------------------------------------------------------------------------- */
+.gc-panel {
+  position: relative;
+  border-radius: var(--r-panel);
+  border: var(--hair);
+  background: var(--surface);
+  overflow: hidden;
+  box-shadow: var(--shadow-raise);
+}
+
+.gc-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding: var(--s-4) var(--s-5);
+  border-bottom: var(--hair);
+}
+
+.gc-panel-head span {
+  font-size: var(--t-meta);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.gc-panel-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--t-meta);
+  color: var(--ink-3);
+}
+
+.gc-panel-tag i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--forest);
+}
+
+.gc-stage {
+  position: relative;
+  height: clamp(300px, 34vw, 420px);
+  background: linear-gradient(
+    180deg,
+    var(--raised) 0%,
+    var(--canvas) 100%
+  );
+}
+
+/* The renderer writes --sky-top / --sky-bottom each frame so the area behind
+   the canvas matches the moment in the day cycle. Both fall back to the token
+   gradient before the first frame is drawn. */
+.gc-canvas {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    var(--sky-top, var(--raised)) 0%,
+    var(--sky-bottom, var(--canvas)) 100%
+  );
+}
+
+.gc-canvas canvas {
+  display: block;
+  border-radius: inherit;
+}
+
+.gc-sky-status {
+  position: absolute;
+  top: var(--s-4);
+  right: var(--s-4);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-1) var(--s-2) var(--s-1) var(--s-3);
+  border-radius: var(--r-pill);
+  border: var(--hair);
+  background: color-mix(in srgb, var(--surface) 84%, transparent);
+  backdrop-filter: blur(10px);
+  font-size: var(--t-meta);
+  color: var(--ink-2);
+}
+
+.gc-sky-status small {
+  padding-right: var(--s-2);
+  color: var(--ink-3);
+}
+
+.gc-sky-status button {
+  padding: 3px var(--s-3);
+  border-radius: var(--r-pill);
+  border: var(--hair);
+  font-size: var(--t-meta);
+  color: var(--ink-2);
+  transition: background var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease);
+}
+
+.gc-sky-status button:hover {
+  background: var(--raised);
+  color: var(--ink);
+}
+
+.gc-stage-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: var(--s-2);
+  padding: var(--s-5);
+  text-align: center;
+}
+
+.gc-stage-fallback b {
+  font-family: var(--font-display);
+  font-size: var(--t-h3);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--track-display);
+}
+
+.gc-stage-fallback small {
+  font-size: var(--t-small);
+  color: var(--ink-3);
+  max-width: 34ch;
+}
+
+/* Caption sits below the canvas rather than over it. */
+.gc-stage-caption {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  padding: var(--s-4) var(--s-5);
+  border-top: var(--hair);
+  font-size: var(--t-small);
+  color: var(--ink-3);
+  line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   Floating notes
+   Two annotations over the model, kept from the original design. They sit in
+   opposite corners so neither covers the building, the street or the car.
+   -------------------------------------------------------------------------- */
+.gc-note {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  max-width: 232px;
+  padding: 10px 12px;
+  border-radius: var(--r-card);
+  border: var(--hair);
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  backdrop-filter: saturate(1.3) blur(14px);
+  box-shadow: var(--shadow-rest);
+  pointer-events: none;
+}
+
+.gc-note--research {
+  left: var(--s-4);
+  top: var(--s-4);
+  animation: gc-drift 6.5s ease-in-out infinite;
+}
+
+.gc-note--future {
+  right: var(--s-4);
+  bottom: var(--s-4);
+  animation: gc-drift 8s ease-in-out infinite reverse;
+}
+
+@keyframes gc-drift {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gc-note--research,
+  .gc-note--future {
+    animation: none;
+  }
+}
+
+.gc-note-icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--mint);
+  color: var(--forest);
+}
+
+.gc-note-icon--warm {
+  background: color-mix(in srgb, var(--caution) 15%, var(--surface));
+  color: var(--caution);
+}
+
+.gc-note b {
+  display: block;
+  font-size: var(--t-small);
+  font-weight: var(--weight-medium);
+  line-height: 1.35;
+}
+
+.gc-note small {
+  display: block;
+  font-size: var(--t-meta);
+  color: var(--ink-3);
+  line-height: 1.4;
+}
+
+.gc-panel-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-3) var(--s-5);
+  border-top: var(--hair);
+}
+
+.gc-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  padding: 3px;
+  border-radius: var(--r-pill);
+  border: var(--hair);
+  background: var(--canvas);
+}
+
+.gc-stepper button {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--ink-2);
+  transition: background var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease);
+}
+
+.gc-stepper button:not(:disabled):hover {
+  background: var(--raised);
+  color: var(--ink);
+}
+
+.gc-stepper output {
+  min-width: 18px;
+  text-align: center;
+  font-size: var(--t-small);
+  font-variant-numeric: tabular-nums;
+}
+
+.gc-stepper-label {
+  font-size: var(--t-meta);
+  color: var(--ink-3);
+  margin-right: var(--s-1);
+}
+
+.gc-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  height: 32px;
+  padding-inline: var(--s-3) var(--s-2);
+  border-radius: var(--r-pill);
+  border: var(--hair);
+  font-size: var(--t-meta);
+  color: var(--ink-2);
+  transition: color var(--t-fast) var(--ease),
+    border-color var(--t-fast) var(--ease);
+}
+
+.gc-toggle:hover {
+  color: var(--ink);
+  border-color: var(--line-strong);
+}
+
+.gc-toggle-track {
+  width: 26px;
+  height: 15px;
+  border-radius: var(--r-pill);
+  background: var(--line-strong);
+  position: relative;
+  transition: background var(--t-base) var(--ease);
+}
+
+.gc-toggle[aria-pressed="true"] .gc-toggle-track {
+  background: var(--forest);
+}
+
+.gc-toggle-track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--surface);
+  transition: transform var(--t-base) var(--ease);
+}
+
+.gc-toggle[aria-pressed="true"] .gc-toggle-track::after {
+  transform: translateX(11px);
+}
+
+.gc-hint {
+  margin-left: auto;
+  font-size: var(--t-meta);
+  color: var(--ink-3);
+}
+
+/* --------------------------------------------------------------------------
+   Evidence strip
+   The rules stay full-bleed; the content inside sits on the same measure as
+   every other section. Without the inner wrapper this block ran edge to edge
+   while the hero and the sections beneath were inset by the gutter, so its
+   three columns sat well outside the text column on a wide screen.
+   -------------------------------------------------------------------------- */
+.gc-strip {
+  border-block: var(--hair);
+}
+
+.gc-strip-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.gc-strip-grid > div {
+  display: flex;
+  gap: var(--s-4);
+  padding: var(--s-6) var(--s-5);
+}
+
+.gc-strip-grid > div + div {
+  border-left: var(--hair);
+}
+
+.gc-strip svg {
+  color: var(--forest);
+  flex-shrink: 0;
+}
+
+.gc-strip b {
+  display: block;
+  font-size: var(--t-ui);
+  font-weight: var(--weight-medium);
+  margin-top: 2px;
+}
+
+.gc-strip p {
+  font-size: var(--t-small);
+  color: var(--ink-3);
+  line-height: 1.5;
+  margin-top: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   Section shell
+   -------------------------------------------------------------------------- */
+/* --------------------------------------------------------------------------
+   Section rhythm
+   Only the leading edge is padded. Every section previously carried padding on
+   both sides, so two adjacent sections stacked two full --section values and
+   left roughly 230px of dead air between a button and the next heading — most
+   visible in the thin Method section, where a single link sat alone in it.
+   The closing section supplies the trailing pad before the footer.
+   -------------------------------------------------------------------------- */
+.gc-section {
+  padding-block-start: var(--section);
+  /* Bottom padding is what clears the hairline on the next section.
+
+     The borders live on the full-bleed wrappers (.gc-example, .gc-footer)
+     while this padding lives on the inner .gc-shell, so with no bottom pad
+     the last line of copy sat directly on the rule. Sections still add up to
+     one --section between them, not two. */
+  padding-block-end: var(--s-7);
+}
+
+.gc-closing {
+  padding-block-end: var(--section);
+}
+
+/* Eyebrow, heading and paragraph stack in one column.
+
+   Split across two grid columns the paragraph landed at the midpoint of a
+   wide viewport and left a gulf roughly 600px wide between it and the heading
+   it was describing. The original stacked all three in a single measure,
+   which is both denser and easier to read. */
+.gc-section-head {
+  max-width: 46rem;
+  margin-bottom: var(--s-7);
+}
+
+.gc-section-head h2 {
+  font-family: var(--font-display);
+  font-size: var(--t-h2);
+  line-height: var(--lead-head);
+  letter-spacing: var(--track-display);
+  margin-top: var(--s-4);
+  max-width: 18ch;
+  text-wrap: balance;
+}
+
+.gc-section-head p {
+  margin-top: var(--s-4);
+  font-size: var(--t-lead);
+  color: var(--ink-2);
+  max-width: 52ch;
+}
+
+/* The second column carries its own action where there is one, so the button
+   sits under the copy it belongs to instead of orphaned below the heading. */
+.gc-section-aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-5);
+}
+
+/* --------------------------------------------------------------------------
+   Payback chart
+   Sits beside the How-it-works heading to fill the right half of the measure.
+   Line weights, colours and the axis type all come from the same tokens as
+   the page, so it reads as part of the interface rather than a pasted graphic.
+   -------------------------------------------------------------------------- */
+.gc-chart {
+  margin: 0;
+  padding: var(--s-5);
+  border-radius: var(--r-card);
+  border: var(--hair);
+  background: var(--surface);
+  box-shadow: var(--shadow-rest);
+}
+
+.gc-chart-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: var(--s-4);
+}
+
+.gc-chart-title {
+  font-size: var(--t-small);
+  font-weight: var(--weight-medium);
+  letter-spacing: -0.01em;
+}
+
+.gc-chart-sub {
+  font-size: var(--t-meta);
+  color: var(--ink-3);
+}
+
+.gc-chart-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.gc-chart-grid {
+  stroke: var(--line);
+  stroke-width: 0.5;
+}
+
+.gc-chart-axis-line {
+  stroke: var(--line-strong);
+  stroke-width: 0.5;
+}
+
+.gc-chart-axis {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  fill: var(--ink-3);
+  letter-spacing: 0.04em;
+}
+
+/* The area between the specifications, showing which side each is on. Tinted
+   with the graph's own green so it reads as part of the sustainable series
+   rather than a neutral grey wash. */
+.gc-chart-band {
+  fill: color-mix(in srgb, var(--forest) 30%, var(--surface));
+}
+
+/* Names the shaded area so the tint is self-explanatory. */
+.gc-chart-band-label {
+  font-family: var(--font-body);
+  font-size: 9.5px;
+  fill: var(--forest);
+  letter-spacing: 0.01em;
+}
+
+.gc-chart-line {
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.gc-chart-line--conventional {
+  stroke: var(--ink-3);
+}
+
+.gc-chart-line--sustainable {
+  stroke: var(--forest);
+}
+
+.gc-chart-crossover {
+  stroke: var(--forest);
+  stroke-width: 0.5;
+  stroke-dasharray: 2 3;
+  opacity: 0.6;
+}
+
+.gc-chart-dot {
+  fill: var(--forest);
+  stroke: var(--surface);
+  stroke-width: 1.5;
+}
+
+.gc-chart-flag,
+.gc-chart-endpoint {
+  font-family: var(--font-body);
+  font-size: 10px;
+  fill: var(--forest);
+  letter-spacing: 0.01em;
+}
+
+.gc-chart-endpoint {
+  fill: var(--ink-3);
+}
+
+.gc-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-5);
+  margin: var(--s-4) 0 0;
+  padding: var(--s-3) 0 0;
+  list-style: none;
+  border-top: var(--hair);
+  font-size: var(--t-meta);
+  color: var(--ink-2);
+}
+
+.gc-chart-legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.gc-key {
+  width: 14px;
+  height: 2px;
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+
+.gc-key--conventional { background: var(--ink-3); }
+.gc-key--sustainable { background: var(--forest); }
+
+/* Two-column measure: heading on the left, chart on the right. */
+.gc-section-head--split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
+  gap: clamp(32px, 4.5vw, 72px);
+  align-items: center;
+  max-width: none;
+  margin-bottom: var(--s-7);
+}
+
+.gc-section-head--split > div > p {
+  margin-top: var(--s-4);
+}
+
+@media (max-width: 1080px) {
+  .gc-section-head--split {
+    grid-template-columns: 1fr;
+    gap: var(--s-6);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Steps
+   -------------------------------------------------------------------------- */
+.gc-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-5);
+  counter-reset: gc-step;
+}
+
+.gc-step {
+  counter-increment: gc-step;
+  padding-top: var(--s-6);
+  border-top: var(--hair);
+}
+
+/* The step number is an anchor for the eye, not decoration. It was 12px in
+   --ink-3 and sat 24px under the rule, which made it read as an artefact of
+   the border rather than part of the step. */
+.gc-step::before {
+  content: "0" counter(gc-step);
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--t-small);
+  letter-spacing: 0.12em;
+  color: var(--ink-2);
+  margin-bottom: var(--s-3);
+}
+
+.gc-step h3 {
+  font-size: var(--t-h3);
+  letter-spacing: -0.015em;
+}
+
+.gc-step p {
+  margin-top: var(--s-3);
+  font-size: var(--t-body);
+  color: var(--ink-2);
+  max-width: 38ch;
+}
+
+/* --------------------------------------------------------------------------
+   Worked example — the credibility section
+   -------------------------------------------------------------------------- */
+/* Same canvas as every other section.
+
+   This band was tinted --raised, which is correct in principle — an elevation
+   step should read as one — but at full width a block this large made the
+   difference obvious against the untinted sections above and below it. The
+   section separates on its hairline border instead; the white card inside it
+   carries the elevation. */
+.gc-example {
+  background: var(--canvas);
+}
+
+.gc-example-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: clamp(32px, 5vw, 72px);
+  align-items: start;
+}
+
+.gc-example h2 {
+  font-family: var(--font-display);
+  font-size: var(--t-h2);
+  line-height: var(--lead-head);
+  letter-spacing: var(--track-display);
+  margin-top: var(--s-4);
+  text-wrap: balance;
+}
+
+.gc-example-lede {
+  margin-top: var(--s-4);
+  color: var(--ink-2);
+  max-width: 44ch;
+}
+
+/* Two supporting facts, set quietly.
+
+   These were originally display-sized serif figures, which made "40 years" and
+   "Year 10" shout louder than the cost figures they were meant to support.
+   They now read as captions to the table rather than competing with it. */
+.gc-example-facts {
+  margin: var(--s-6) 0 0;
+  padding-top: var(--s-5);
+  border-top: var(--hair);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-6) var(--s-8);
+}
+
+.gc-example-facts dt {
+  font-size: var(--t-meta);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.gc-example-facts dd {
+  margin: var(--s-2) 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(30px, 3vw, 42px);
+  line-height: 1.05;
+  letter-spacing: var(--track-display);
+}
+
+/* Elevation runs band -> card -> strip. The band is oat, the card is white
+   and sits on it, and the note closes the card as an oat strip. Previously the
+   card was the darker surface resting on a white band, which read as a hole
+   rather than a raised panel. */
+.gc-outcome {
+  border-radius: var(--r-card);
+  border: var(--hair);
+  background: var(--surface);
+  overflow: hidden;
+  box-shadow: var(--shadow-rest);
+}
+
+.gc-outcome-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding: var(--s-4) var(--s-5);
+  border-bottom: var(--hair);
+  font-size: var(--t-small);
+}
+
+.gc-outcome-head span {
+  color: var(--ink-3);
+}
+
+.gc-outcome-rows > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--s-4);
+  padding: var(--s-4) var(--s-5);
+  border-bottom: var(--hair);
+}
+
+.gc-outcome-rows > div:last-child {
+  border-bottom: 0;
+}
+
+.gc-outcome-rows dt {
+  font-size: var(--t-small);
+  color: var(--ink-2);
+}
+
+.gc-outcome-rows dd {
+  margin: 0;
+  font-size: var(--t-h3);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+/* The one figure the section exists to deliver. Forest green on white clears
+   6.4:1, so it can carry meaning rather than decoration. */
+.gc-outcome-rows .is-save dd {
+  color: var(--forest);
+  font-weight: var(--weight-medium);
+}
+
+.gc-outcome-note {
+  padding: var(--s-4) var(--s-5);
+  background: var(--raised);
+  border-top: var(--hair);
+  font-size: var(--t-meta);
+  color: var(--ink-3);
+  line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   Closing band
+   The method link and the primary call to action share one section. As two
+   separate sections they were separated by a full section padding plus the
+   section-head margin — about 160px of nothing between a link and the next
+   heading, because neither block has enough content to stand alone.
+   -------------------------------------------------------------------------- */
+.gc-close {
+  padding-block-end: var(--section);
+}
+
+.gc-close-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: clamp(36px, 5vw, 72px) clamp(32px, 6vw, 96px);
+  align-items: start;
+  padding-top: var(--s-7);
+  border-top: var(--hair);
+}
+
+.gc-close-lead {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-5);
+}
+
+.gc-close-lead > svg {
+  color: var(--forest);
+}
+
+.gc-close-lead h2 {
+  font-family: var(--font-display);
+  font-size: var(--t-h1);
+  line-height: var(--lead-head);
+  letter-spacing: var(--track-display);
+  max-width: 16ch;
+  text-wrap: balance;
+}
+
+.gc-close-aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-4);
+}
+
+.gc-close-aside h3 {
+  font-family: var(--font-display);
+  font-size: var(--t-h3);
+  line-height: var(--lead-head);
+  letter-spacing: var(--track-display);
+  margin-top: var(--s-1);
+}
+
+.gc-close-aside p {
+  font-size: var(--t-body);
+  color: var(--ink-2);
+  max-width: 46ch;
+}
+
+/* --------------------------------------------------------------------------
+   Footer
+   -------------------------------------------------------------------------- */
+/* --------------------------------------------------------------------------
+   Full-bleed sections
+   .gc-example and .gc-footer are page-width wrappers, but a hairline running
+   edge to edge leaves a long stretch of bare rule sitting in the outer gutter
+   with no content beside it. The rule is drawn with the same arithmetic
+   .gc-shell uses, so it lands exactly on the text measure at any width.
+   -------------------------------------------------------------------------- */
+.gc-example,
+.gc-footer {
+  position: relative;
+  border-block: 0;
+}
+
+.gc-example::before,
+.gc-example::after,
+.gc-footer::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--gutter) + max(0px, (100% - var(--page-max)) / 2));
+  right: calc(var(--gutter) + max(0px, (100% - var(--page-max)) / 2));
+  height: var(--hair);
+  background: var(--line);
+  pointer-events: none;
+}
+
+.gc-example::before,
+.gc-footer::before {
+  top: 0;
+}
+
+.gc-example::after {
+  bottom: 0;
+}
+
+.gc-footer {
+  margin-top: auto;
+}
+
+.gc-footer-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-5);
+  padding-block: var(--s-5);
+  font-size: var(--t-small);
+  color: var(--ink-3);
+}
+
+.gc-footer-row a:hover {
+  color: var(--ink);
+}
+
+.gc-footer-row small {
+  margin-left: auto;
+  font-size: var(--t-meta);
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 1080px) {
+  .gc-hero {
+    grid-template-columns: 1fr;
+    gap: var(--s-8);
+  }
+
+  .gc-hero-lede {
+    max-width: 22ch;
+  }
+
+  .gc-example-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 860px) {
+  .gc-nav {
+    display: none;
+  }
+
+  .gc-nav.is-open {
+    display: flex;
+    position: absolute;
+    top: 64px;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    padding: var(--s-3) var(--gutter) var(--s-5);
+    background: var(--canvas);
+    border-bottom: var(--hair);
+  }
+
+  .gc-nav.is-open a {
+    width: 100%;
+    padding-block: var(--s-3);
+    border-bottom: var(--hair);
+  }
+
+  .gc-nav.is-open a[aria-current="page"]::after {
+    display: none;
+  }
+
+  .gc-burger {
+    display: grid;
+  }
+
+  .gc-strip-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .gc-strip-grid > div + div {
+    border-left: 0;
+    border-top: var(--hair);
+  }
+
+  .gc-steps {
+    grid-template-columns: 1fr;
+    gap: var(--s-6);
+  }
+
+  .gc-footer-row small {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .gc-hero-actions .gc-btn {
+    width: 100%;
+  }
+
+  .gc-hint {
+    display: none;
+  }
+
+  .gc-annotation {
+    left: var(--s-3);
+    right: var(--s-3);
+    max-width: none;
+  }
+}

@@ -1,6 +1,7 @@
 /* EasyUI adaptations share one GreenCost palette and motion language. */
-:root{--ui-forest:#174d3c;--ui-forest-dark:#10392d;--ui-mint:#eef6f0;--ui-border:#dfe7e1;--ui-text:#192b23;--ui-muted:#57695f;--ui-shadow:0 8px 28px #173e2910;--ui-ease:cubic-bezier(.2,.8,.2,1)}
-body{background:#f8faf8;color:var(--ui-text)}
+/* Palette resolves through tokens.css. The former
+   `body{background:#f8faf8;color:var(--ui-text)}` pinned the page to a light
+   canvas regardless of theme and has been removed. */
 .landing,.method-page{--paper:#f8faf8;--ink:var(--ui-text);--muted:var(--ui-muted)}
 button,a,summary{transition:background-color .18s,color .18s,border-color .18s,box-shadow .18s,transform .18s var(--ui-ease)}
 button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid #397b5e;outline-offset:4px}
