@@ -43,6 +43,9 @@
   --forest: #1d6a4b;
   --forest-hover: #154e38;
   --forest-ink: #ffffff;
+  /* Brand marks keep one signature green on every page and in every theme. */
+  --brand-mark-bg: #1d6a4b;
+  --brand-mark-ink: #ffffff;
   --mint: #e6f0e9;
   --mint-line: #c2dacb;
 

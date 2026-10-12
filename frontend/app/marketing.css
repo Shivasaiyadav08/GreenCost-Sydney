@@ -79,8 +79,8 @@
   display: grid;
   place-items: center;
   border-radius: var(--r-control);
-  background: var(--forest);
-  color: var(--forest-ink);
+  background: var(--brand-mark-bg);
+  color: var(--brand-mark-ink);
 }
 
 .gc-brand-word {
@@ -501,6 +501,71 @@
   font-size: var(--t-meta);
   color: var(--ink-3);
   line-height: 1.4;
+}
+
+/* The two roof callouts share a row so their boxes never collide on phones. */
+.gc-house-callouts {
+  position: absolute;
+  z-index: 4;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  pointer-events: none;
+}
+
+.gc-house-callouts .gc-house-note {
+  position: static;
+  min-width: 0;
+  max-width: none;
+  gap: 8px;
+  padding: 8px 10px;
+  animation: none;
+  backdrop-filter: none;
+}
+
+.gc-house-note > div {
+  min-width: 0;
+}
+
+.gc-house-note b,
+.gc-house-note small {
+  overflow-wrap: anywhere;
+}
+
+.gc-house-note--tank {
+  right: 12px;
+  bottom: 12px;
+  max-width: 232px;
+  animation: none;
+  backdrop-filter: none;
+}
+
+@media (max-width: 420px) {
+  .gc-house-callouts {
+    gap: 6px;
+  }
+
+  .gc-house-callouts .gc-house-note {
+    align-items: center;
+    gap: 6px;
+    padding: 7px 8px;
+  }
+
+  .gc-house-callouts .gc-house-note .gc-note-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .gc-house-callouts .gc-house-note b {
+    font-size: 11px;
+  }
+
+  .gc-house-callouts .gc-house-note small {
+    display: none;
+  }
 }
 
 .gc-panel-foot {

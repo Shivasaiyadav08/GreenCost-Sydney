@@ -217,16 +217,18 @@ function Chips(){
   };
   const icon: React.CSSProperties = {background:'#e6f0e9', color:'#1d6a4b'};
   const sub: React.CSSProperties = {color:'#6e6b64'};
-  const chip = (iconNode:ReactNode, title:string, subText:string, style:React.CSSProperties)=>(
-    <div className="gc-note" style={{...style, ...card, pointerEvents:'none'}}>
+  const chip = (iconNode:ReactNode, title:string, subText:string, className:string)=>(
+    <div className={`gc-note gc-house-note ${className}`} style={{...card, pointerEvents:'none'}}>
       <span className="gc-note-icon" style={icon}>{iconNode}</span>
       <div><b>{title}</b><small style={sub}>{subText}</small></div>
     </div>
   );
   return <>
-    {chip(<Sun size={15}/>, 'Rooftop solar', 'On the sun-facing slope', {left:12, top:12, animation:'none'})}
-    {chip(<Layers size={15}/>, 'Insulated shell', 'Roof, walls and windows', {right:12, top:12, animation:'none'})}
-    {chip(<Droplet size={15}/>, 'Rainwater tank', 'In the front garden', {right:12, bottom:12, animation:'none'})}
+    <div className="gc-house-callouts">
+      {chip(<Sun size={15}/>, 'Rooftop solar', 'On the sun-facing slope', 'gc-house-note--solar')}
+      {chip(<Layers size={15}/>, 'Insulated shell', 'Roof, walls and windows', 'gc-house-note--shell')}
+    </div>
+    {chip(<Droplet size={15}/>, 'Rainwater tank', 'In the front garden', 'gc-house-note--tank')}
   </>;
 }
 
