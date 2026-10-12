@@ -543,7 +543,7 @@
   backdrop-filter: none;
 }
 
-@media (max-width: 420px) {
+@media (max-width: 860px) {
   .gc-house-callouts {
     gap: 6px;
   }
@@ -1271,27 +1271,86 @@
   }
 
   .gc-nav.is-open {
-    display: flex;
+    display: grid;
     position: absolute;
     top: 64px;
     left: 0;
     right: 0;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0;
-    padding: var(--s-3) var(--gutter) var(--s-5);
+    gap: var(--s-2);
+    padding: var(--s-4) var(--gutter) var(--s-5);
     background: var(--canvas);
     border-bottom: var(--hair);
+    box-shadow: var(--shadow-raise);
+  }
+
+  .gc-nav.is-open::before {
+    content: "EXPLORE GREEN COST";
+    padding: 0 var(--s-2) var(--s-1);
+    color: var(--ink-3);
+    font-size: 10px;
+    font-weight: var(--weight-semibold);
+    letter-spacing: var(--track-eyebrow);
   }
 
   .gc-nav.is-open a {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) 20px;
+    align-items: center;
     width: 100%;
-    padding-block: var(--s-3);
-    border-bottom: var(--hair);
+    min-height: 62px;
+    padding: var(--s-3) var(--s-4);
+    border: var(--hair);
+    border-radius: var(--r-panel);
+    background: var(--surface);
+    color: var(--ink-2);
+    font-size: 16px;
+    font-weight: var(--weight-medium);
+    transition: background var(--t-fast) var(--ease),
+      border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease),
+      transform var(--t-fast) var(--ease);
+  }
+
+  .gc-nav.is-open a::before {
+    color: var(--forest);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: var(--weight-medium);
+    letter-spacing: 0;
+  }
+
+  .gc-nav.is-open a:nth-child(1)::before { content: "01"; }
+  .gc-nav.is-open a:nth-child(2)::before { content: "02"; }
+  .gc-nav.is-open a:nth-child(3)::before { content: "03"; }
+
+  .gc-nav.is-open a::after {
+    content: "→";
+    justify-self: end;
+    color: var(--ink-3);
+    font-size: 18px;
+    transition: color var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+  }
+
+  .gc-nav.is-open a:hover {
+    transform: translateY(-1px);
+    border-color: var(--line-strong);
+    color: var(--ink);
+  }
+
+  .gc-nav.is-open a:hover::after {
+    color: var(--forest);
+    transform: translateX(2px);
+  }
+
+  .gc-nav.is-open a[aria-current="page"] {
+    border-color: var(--mint-line);
+    background: var(--mint);
+    color: var(--ink);
   }
 
   .gc-nav.is-open a[aria-current="page"]::after {
-    display: none;
+    content: "✓";
+    color: var(--forest);
+    font-size: 15px;
   }
 
   .gc-burger {
