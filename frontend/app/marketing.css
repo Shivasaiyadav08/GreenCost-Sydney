@@ -392,6 +392,42 @@
   color: var(--ink);
 }
 
+.gc-zoom-controls {
+  position: absolute;
+  z-index: 2;
+  left: var(--s-4);
+  bottom: var(--s-4);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: var(--hair);
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  box-shadow: var(--shadow-rest);
+  backdrop-filter: blur(10px);
+}
+
+.gc-zoom-controls button {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--ink-2);
+  transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+
+.gc-zoom-controls button:hover {
+  background: var(--raised);
+  color: var(--ink);
+}
+
+.gc-zoom-controls button:focus-visible {
+  outline: 2px solid var(--forest);
+  outline-offset: 2px;
+}
+
 .gc-stage-fallback {
   position: absolute;
   inset: 0;
@@ -1393,5 +1429,25 @@
     left: var(--s-3);
     right: var(--s-3);
     max-width: none;
+  }
+}
+
+@media (max-width: 700px) {
+  /* The notes are useful context on wide screens, but cover the roof and
+     garden in the narrow mobile scene. The caption below keeps the context. */
+  .gc-stage > .gc-note {
+    display: none;
+  }
+
+  .gc-zoom-controls {
+    left: 10px;
+    bottom: 10px;
+  }
+}
+
+@media (max-width: 520px) {
+  .gc-zoom-controls button {
+    width: 40px;
+    height: 40px;
   }
 }

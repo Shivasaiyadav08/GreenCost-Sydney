@@ -3,6 +3,7 @@ import {Component,useEffect,useMemo,useRef,useState,type ReactNode} from 'react'
 import {Canvas,useFrame,useThree} from '@react-three/fiber';
 import {ContactShadows,OrbitControls} from '@react-three/drei';
 import {useReducedMotion} from 'framer-motion';
+import {Minus,Plus,RotateCcw} from 'lucide-react';
 import * as THREE from 'three';
 import RoadTraffic from './RoadTraffic';
 import DayNightSky from './DayNightSky';
@@ -137,23 +138,32 @@ function Home({floors, solar, reduced, night, p}:{
   );
 }
 
-function CameraRig({floors, reduced}:{floors:number; reduced:boolean}){
+function CameraRig({floors, reduced, zoom}:{floors:number; reduced:boolean; zoom:number}){
   const {camera, invalidate} = useThree();
   const height = Math.min(4, Math.max(1, Math.round(floors)));
 
   useEffect(()=>{
     const distance = height >= 3 ? 11.8 : 9.9;
-    camera.position.set(distance*.82, 7.4 + (height-2)*1.5, distance + 2.2);
-    camera.lookAt(0, height*1.35/2, 1.3);
+    const targetY = height*1.35/2;
+    const targetZ = 1.3;
+    const baseY = 7.4 + (height-2)*1.5;
+    camera.position.set(
+      distance*.82*zoom,
+      targetY + (baseY-targetY)*zoom,
+      targetZ + (distance+2.2-targetZ)*zoom,
+    );
+    camera.lookAt(0, targetY, targetZ);
     camera.updateProjectionMatrix();
     invalidate();
-  }, [camera, height, invalidate, reduced]);
+  }, [camera, height, invalidate, reduced, zoom]);
 
   return (
     <OrbitControls
-      enableZoom={false}
+      enableZoom
       enablePan={false}
       enableDamping={!reduced}
+      minDistance={6}
+      maxDistance={26}
       minPolarAngle={.45}
       maxPolarAngle={1.35}
       target={[0, height*1.35/2, 1.3]}
@@ -172,7 +182,19 @@ export default function WorldScene({floors = 2, solar = true}:{floors?:number; s
   const [night, setNight] = useState(false);
   const [paused, setPaused] = useState(false);
   const [scrolling, setScrolling] = useState(false);
+  const [mobile, setMobile] = useState(false);
+  const [zoom, setZoom] = useState(1);
   const host = useRef<HTMLDivElement>(null);
+
+  const defaultZoom = mobile ? 1.24 : 1;
+
+  useEffect(()=>{
+    const query = window.matchMedia('(max-width: 700px)');
+    const update = ()=>setMobile(query.matches);
+    update();
+    query.addEventListener('change', update);
+    return ()=>query.removeEventListener('change', update);
+  },[]);
 
   /* Capability and idle checks. Rendering stops when the panel scrolls away or
      the tab is hidden, and when the visitor pauses or prefers reduced motion,
@@ -252,7 +274,7 @@ export default function WorldScene({floors = 2, solar = true}:{floors?:number; s
               color="#1d1a15"
             />
 
-            <CameraRig floors={floors} reduced={reduced || paused}/>
+            <CameraRig floors={floors} reduced={reduced || paused} zoom={zoom * defaultZoom}/>
           </Canvas>
         ) : <Fallback/>}
       </Boundary>
@@ -267,6 +289,20 @@ export default function WorldScene({floors = 2, solar = true}:{floors?:number; s
             </button>
           )}
           <small>Illustrative cycle</small>
+        </div>
+      )}
+
+      {supported && (
+        <div className="gc-zoom-controls" role="group" aria-label="Model zoom controls">
+          <button type="button" aria-label="Zoom out" onClick={()=>setZoom(value=>Math.min(1.8,value+.12))}>
+            <Minus size={17}/>
+          </button>
+          <button type="button" aria-label="Reset model zoom" onClick={()=>setZoom(1)}>
+            <RotateCcw size={15}/>
+          </button>
+          <button type="button" aria-label="Zoom in" onClick={()=>setZoom(value=>Math.max(.76,value-.12))}>
+            <Plus size={17}/>
+          </button>
         </div>
       )}
     </div>
