@@ -200,3 +200,41 @@ def test_timeout_and_empty_backups_finish_with_calculated_fallback(monkeypatch):
         assert ai.generate("system", CONTEXT) == (None, 3, "unavailable")
     assert ai.trace()["explanation_provider"] == "calculated"
     assert ai.trace()["groq"] == "empty_response"
+
+
+def truncated():
+    # finish_reason "length" means the free model ran out of budget mid-reply.
+    return httpx.Response(200, request=httpx.Request("POST", "https://openrouter.ai"),
+                          json={"choices": [{"finish_reason": "length", "message": {"content": "partial"}}]})
+
+
+def test_truncated_primary_is_retried_once(monkeypatch):
+    # openrouter/free picks a different model per call, so a truncated reply is
+    # worth a second attempt before falling through to the backups.
+    keys(monkeypatch)
+    with patch.object(ai.httpx, "post", side_effect=[truncated(), reply()]) as request:
+        assert ai.generate("system", CONTEXT) == (TEXT, 2, "complete")
+        assert request.call_count == 2
+    assert ai.trace()["explanation_provider"] == "openrouter"
+
+
+def test_backups_get_a_turn_when_primary_is_truncated(monkeypatch):
+    # A slow primary must not consume the whole budget: gemini still returns text.
+    keys(monkeypatch)
+    calls = []
+
+    def router(url, **kwargs):
+        calls.append("openrouter" if "openrouter" in url else ("groq" if "groq" in url else "gemini"))
+        if "generativelanguage" in url:
+            return httpx.Response(200, request=httpx.Request("POST", url),
+                                  json={"candidates": [{"content": {"parts": [{"text": TEXT}]}}]})
+        if "groq" in url:
+            return httpx.Response(500, request=httpx.Request("POST", url))
+        return truncated()
+
+    with patch.object(ai.httpx, "post", side_effect=router):
+        assert ai.generate("system", CONTEXT) == (TEXT, 4, "complete")
+    assert calls == ["openrouter", "openrouter", "groq", "gemini"]
+    assert ai.trace()["openrouter"] == "incomplete_response"
+    assert ai.trace()["gemini"] == "complete"
+    assert ai.trace()["explanation_provider"] == "gemini"

@@ -126,20 +126,32 @@ def generate(system, context):
     _trace.set(statuses)
     calls = 0
     deadline = time.monotonic() + 45
+    # Guarantee every backup a real turn: a slow primary must not consume the
+    # whole budget and leave the others reported as "time limit reached".
+    reserved = {"groq": 12, "gemini": 12}
     for provider in PROVIDERS:
-        remaining = deadline - time.monotonic()
-        if remaining < 1:
-            statuses[provider] = "time_limit"
-            break
-        timeout = min(12, remaining)
-        text, count, status = gemini.generate(system, context, timeout=timeout) if provider == "gemini" else chat(provider, system, context, timeout)
-        calls += count
-        if text:
-            text, cleaned_status = clean_reply(text, context)
-            if not text:
-                status = cleaned_status
-        statuses[provider] = status
-        if text and status == "complete":
-            statuses["explanation_provider"] = provider
-            return text, calls, "complete"
+        attempts = 2 if provider == "openrouter" else 1
+        for _ in range(attempts):
+            remaining = deadline - time.monotonic()
+            pending = [p for p in PROVIDERS if p != provider and statuses.get(p) == "not_requested"]
+            keep_back = sum(reserved.get(p, 0) for p in pending)
+            if remaining < 1:
+                statuses[provider] = "time_limit"
+                break
+            # Stop retrying once only the time reserved for later providers is left.
+            if attempts > 1 and remaining <= keep_back + 1:
+                break
+            text, count, status = gemini.generate(system, context, timeout=min(12, remaining)) if provider == "gemini" else chat(provider, system, context, min(12, remaining))
+            calls += count
+            if text:
+                text, cleaned_status = clean_reply(text, context)
+                if not text:
+                    status = cleaned_status
+            statuses[provider] = status
+            if text and status == "complete":
+                statuses["explanation_provider"] = provider
+                return text, calls, "complete"
+            # Only a truncated reply is worth a second try; other failures will repeat.
+            if status != "incomplete_response":
+                break
     return None, calls, statuses["gemini"] if statuses["gemini"] != "not_configured" else "not_configured"
