@@ -40,12 +40,23 @@ export async function api<T>(path:string, body?:unknown):Promise<T> {
 }
 
 export async function streamAnalysis(project:Project,onStage:(event:Stage)=>void):Promise<Analysis>{
- const response=await fetch('/api/analyse/stream',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(project),signal:AbortSignal.timeout(60000)});
- if(!response.ok)await readResponse(response);
- if(!response.body)throw new Error('The response stream is unavailable. Please retry.');
+ // A single wall-clock deadline is wrong for this stream: a hosted instance may
+ // spend ~50s waking before it emits anything, and the research explanation can
+ // then run for another minute. A fixed 60s cutoff killed analyses that were
+ // still progressing. The deadline is therefore reset on every stage event, so
+ // it only fires when the stream genuinely stalls, with a hard ceiling in case
+ // an instance keeps trickling without ever finishing.
+ const IDLE_MS=90000, CEILING_MS=6*60*1000;
+ const controller=new AbortController();
+ let idle=setTimeout(()=>controller.abort(),IDLE_MS);
+ const ceiling=setTimeout(()=>controller.abort(),CEILING_MS);
+ const keepAlive=()=>{clearTimeout(idle);idle=setTimeout(()=>controller.abort(),IDLE_MS);};
+ const response=await fetch('/api/analyse/stream',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(project),signal:controller.signal}).catch(error=>{clearTimeout(idle);clearTimeout(ceiling);throw error;});
+ if(!response.ok){clearTimeout(idle);clearTimeout(ceiling);await readResponse(response);}
+ if(!response.body){clearTimeout(idle);clearTimeout(ceiling);throw new Error('The response stream is unavailable. Please retry.');}
  const reader=response.body.getReader(),decoder=new TextDecoder();let buffer='',analysis:Analysis|undefined;
- function consume(){let boundary;while((boundary=buffer.indexOf('\n\n'))!==-1){const block=buffer.slice(0,boundary);buffer=buffer.slice(boundary+2);const line=block.split('\n').find(l=>l.startsWith('data: '));if(!line)continue;const event:Stage=JSON.parse(line.slice(6));if(event.type==='error')throw new Error(event.message);if(event.type==='result')analysis=event.result;onStage(event);}}
- try{while(true){const {done,value}=await reader.read();if(done)break;buffer+=decoder.decode(value,{stream:true});consume();}buffer+=decoder.decode();consume();}finally{reader.releaseLock();}
+ function consume(){let boundary;while((boundary=buffer.indexOf('\n\n'))!==-1){const block=buffer.slice(0,boundary);buffer=buffer.slice(boundary+2);const line=block.split('\n').find(l=>l.startsWith('data: '));if(!line)continue;const event:Stage=JSON.parse(line.slice(6));keepAlive();if(event.type==='error')throw new Error(event.message);if(event.type==='result')analysis=event.result;onStage(event);}}
+ try{while(true){const {done,value}=await reader.read();if(done)break;buffer+=decoder.decode(value,{stream:true});consume();}buffer+=decoder.decode();consume();}finally{reader.releaseLock();clearTimeout(idle);clearTimeout(ceiling);}
  if(!analysis)throw new Error('The connection ended before your analysis finished. Please retry.');
  return analysis;
 }
