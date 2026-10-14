@@ -1,0 +1,288 @@
+/* Detailed costs (Compare page, Step 2: Budget & bills).
+   Scoped to .dc-costs and .dc- prefixed helpers so no other page or step is
+   affected. Imported last in app/layout.tsx so these rules win over the older
+   shared card rules without !important. */
+
+/* These divs sit inside details.cost-breakdown, where the legacy
+   `.cost-breakdown > div` rule in ui-layer.css applies display:flex. That
+   selector has higher specificity than a bare class, so match its shape to
+   reset it: the cost list and the footer each take a full-width row. */
+.cost-breakdown > .dc-costs,
+.cost-breakdown > .dc-totals,
+.dc-costs,
+.dc-totals {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  border-bottom: 0;
+  padding: 0;
+}
+
+/* The card is only ~425px wide even on a 1280px screen, so viewport media
+   queries cannot describe it. Declare an inline-size container here and adapt
+   the rows to the space actually available. `container-type` does not change
+   the element's own layout, so nothing outside this section is affected. */
+.dc-costs {
+  container-type: inline-size;
+  container-name: dc-costs;
+}
+
+/* Column headings for the desktop table-style list. */
+.dc-cost-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(72px, max-content) max-content 26px;
+  align-items: end;
+  gap: 10px;
+  padding: 0 2px 10px;
+  border-bottom: 1px solid var(--gc-line, #e2e9df);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gc-muted, #5e6e59);
+}
+
+.dc-cost-head > span:nth-child(3) {
+  text-align: right;
+}
+
+/* One vertical row per cost item. Overrides the old three-column card grid. */
+.dc-costs .cost-table {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  width: 100%;
+  min-width: 0;
+}
+
+.dc-costs .cost-line {
+  display: block;
+  min-height: 0;
+  padding: 14px 2px;
+  margin: 0;
+  border: 0;
+  border-bottom: 1px solid var(--gc-line, #e2e9df);
+  border-radius: 0;
+  background: transparent;
+}
+
+.dc-costs .cost-line-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(72px, max-content) max-content 26px;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+
+.dc-costs .cost-line-summary b {
+  min-height: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.dc-costs .cost-line-summary .price-badge {
+  margin: 0;
+  justify-self: start;
+  font-size: 10px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.dc-costs .cost-line-summary strong,
+.dc-costs .cost-line-summary .dc-amount {
+  font-size: 16px;
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--gc-accent, #174d3c);
+  white-space: nowrap;
+}
+
+/* Expanded "Review or edit" panel sits below its row at full width. */
+.dc-costs .cost-row-editor {
+  margin: 12px 0 2px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--gc-line, #e2e9df);
+}
+
+.dc-costs .cost-row-editor > summary {
+  display: inline-flex;
+  min-height: 32px;
+}
+
+.dc-costs .supplier-results {
+  width: 100%;
+}
+
+/* Totals footer. */
+.dc-totals {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0 4px;
+}
+
+.dc-total-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 2px;
+  font-size: 13px;
+  color: var(--gc-muted, #5e6e59);
+}
+
+.dc-total-line b {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--gc-text, #1c2b21);
+  white-space: nowrap;
+}
+
+.dc-total-line i {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--gc-muted, #5e6e59);
+}
+
+.dc-grand {
+  border-top: 1px solid var(--gc-line, #e2e9df);
+  padding-top: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gc-text, #1c2b21);
+}
+
+.dc-grand b {
+  font-size: 20px;
+}
+
+/* Formatted money field with an A$ prefix. */
+.dc-money-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--gc-line, #dce6dd);
+  border-radius: 12px;
+  background: var(--gc-surface, #fff);
+  padding: 0 14px;
+  min-height: 50px;
+}
+
+.dc-money-input > span {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gc-muted, #5e6e59);
+}
+
+.dc-money-input > input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  min-height: 48px;
+  padding: 0;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  color: var(--gc-text, #1c2b21);
+}
+
+.dc-money-input > input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.dc-money-input:focus-within {
+  border-color: var(--gc-accent, #174d3c);
+}
+
+.dc-add {
+  margin-top: 24px;
+}
+
+/* Row layout adapts to the space the card actually has, not the viewport.
+   At >=560px of container width the 4-column table reads well; below that the
+   row stacks (name + badge, then the amount) so nothing wraps one word per
+   line and no horizontal scroll appears. */
+@container dc-costs (max-width: 559px) {
+  .dc-cost-head {
+    display: none;
+  }
+
+  .dc-costs .cost-line-summary {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "name badge"
+      "amount amount";
+    gap: 8px 10px;
+  }
+
+  .dc-costs .cost-line-summary b {
+    grid-area: name;
+  }
+
+  .dc-costs .cost-line-summary .price-badge {
+    grid-area: badge;
+    justify-self: end;
+  }
+
+  .dc-costs .cost-line-summary strong,
+  .dc-costs .cost-line-summary .dc-amount {
+    grid-area: amount;
+    justify-self: start;
+    text-align: left;
+    font-size: 18px;
+  }
+
+  .dc-costs .cost-row-editor > summary {
+    min-height: 44px;
+  }
+}
+
+/* Fallback for browsers without container queries: stack on small viewports. */
+@supports not (container-type: inline-size) {
+  @media (max-width: 767px) {
+    .dc-cost-head {
+      display: none;
+    }
+
+    .dc-costs .cost-line-summary {
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas:
+        "name badge"
+        "amount amount";
+      gap: 8px 10px;
+    }
+
+    .dc-costs .cost-line-summary b {
+      grid-area: name;
+    }
+
+    .dc-costs .cost-line-summary .price-badge {
+      grid-area: badge;
+      justify-self: end;
+    }
+
+    .dc-costs .cost-line-summary strong,
+    .dc-costs .cost-line-summary .dc-amount {
+      grid-area: amount;
+      justify-self: start;
+      text-align: left;
+      font-size: 18px;
+    }
+
+    .dc-costs .cost-row-editor > summary {
+      min-height: 44px;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dc-costs .cost-row-editor > summary,
+  .dc-money-input {
+    transition: none;
+  }
+}

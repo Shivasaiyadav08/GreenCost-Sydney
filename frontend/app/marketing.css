@@ -169,6 +169,17 @@
   transform: translate(2px, -2px);
 }
 
+.gc-btn-secondary {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--line-strong);
+}
+
+.gc-btn-secondary:hover {
+  background: var(--canvas);
+  border-color: var(--forest);
+}
+
 .gc-btn-quiet {
   background: transparent;
   color: var(--ink-2);
@@ -294,6 +305,18 @@
   background: var(--surface);
   overflow: hidden;
   box-shadow: var(--shadow-raise);
+}
+
+/* The live model is an embedded document that renders the interactive 3D
+   stage plus its own building-type and control bars. The height accounts for
+   both bars (~112px) so the stage keeps a usable size and nothing spills past
+   the panel border. */
+.gc-scene-embed {
+  display: block;
+  width: 100%;
+  height: clamp(420px, 42vw, 540px);
+  border: 0;
+  background: var(--surface);
 }
 
 .gc-panel-head {
@@ -1292,6 +1315,12 @@
 }
 
 @media (max-width: 860px) {
+  /* The control bar wraps onto a second row once the panel narrows, so the
+     embed grows to keep the 3D stage usable. */
+  .gc-scene-embed {
+    height: 500px;
+  }
+
   /* A solid sticky header scrolls more smoothly on mobile than a live blur. */
   .gc-header {
     backdrop-filter: none;
@@ -1413,6 +1442,12 @@
 }
 
 @media (max-width: 520px) {
+  /* Below 520px the storeys/solar/night/rain row wraps to three lines; the
+     extra height keeps the model from being squeezed into a strip. */
+  .gc-scene-embed {
+    height: 520px;
+  }
+
   .gc-header-actions > .gc-btn {
     display: none;
   }
@@ -1429,6 +1464,12 @@
     left: var(--s-3);
     right: var(--s-3);
     max-width: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .gc-scene-embed {
+    height: 540px;
   }
 }
 

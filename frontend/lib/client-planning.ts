@@ -1,4 +1,5 @@
 import type {Project} from './types';
+import {formatWaterVolume} from './format';
 
 export const draftKey='greencost-draft-v3';
 export type FormPosition={step:number;review:boolean;period:'annual'|'monthly';zeroConfirmed:boolean};
@@ -26,11 +27,11 @@ export function updateApartmentProject(project:Project,changes:Partial<Project>)
  return next;
 }
 export function waterLabel(kl:number,period='year'){
- return `${(kl*1000).toLocaleString('en-AU',{maximumFractionDigits:2})} L/${period} · ${(kl/1000).toLocaleString('en-AU',{maximumFractionDigits:6})} million litres/${period}`;
+ return formatWaterVolume(kl*1000,period);
 }
 export function restoreDraft(value:string|null):{project:Project;position:FormPosition}|null{
  if(!value||value.length>512000)return null;
  try{const d=JSON.parse(value);if(d.version!==3||!d.project||typeof d.project.postcode!=='string'||!['Residential House','Apartment','Apartment Building','Commercial / Other'].includes(d.project.building_type)||!Array.isArray(d.project.selected_measures)||!Array.isArray(d.project.materials))return null;
- const f=d.position;return {project:d.project,position:{step:[0,1,2].includes(f?.step)?f.step:0,review:f?.review===true,period:f?.period==='monthly'?'monthly':'annual',zeroConfirmed:f?.zeroConfirmed===true}};
+ const f=d.position;return {project:d.project,position:{step:[0,1,2,3].includes(f?.step)?f.step:0,review:f?.review===true,period:f?.period==='monthly'?'monthly':'annual',zeroConfirmed:f?.zeroConfirmed===true}};
  }catch{return null;}
 }

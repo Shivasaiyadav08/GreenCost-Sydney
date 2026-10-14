@@ -131,8 +131,7 @@ def assumptions(p, rates, c, s):
         "Sum of selected installed upgrade differences (indicative unless quoted)" if p.mode == "itemised" else user if p.sustainable_cost is not None else "User-selected package premium applied to conventional capital",
     )
     add("Annual electricity", p.energy_kwh, "kWh/year", user)
-    add("Annual water", p.water_kl * 1000, "L/year", user)
-    add("Annual water in million litres", p.water_kl / 1000, "million L/year", user)
+    add("Annual water", p.water_kl / 1000, "million litres/year", user)
     for key in (() if p.mode == "itemised" else ("energy_reduction", "water_reduction", "maintenance_reduction")):
         add(
             key.replace("_", " ").capitalize(),
@@ -200,7 +199,7 @@ def assumptions(p, rates, c, s):
         energy = model(p, [m["id"] for m in measures if not m["code_required"]])
         for name in ("grid_kwh", "gas_mj", "generation_kwh", "self_use_kwh", "export_kwh", "water_kl", "rainwater_offset_kl"):
             if name in ("water_kl", "rainwater_offset_kl"):
-                add("Modelled: " + ("mains water" if name == "water_kl" else "rainwater offset"), energy[name] * 1000, "L/year", "Computed using indicative end-use assumptions")
+                add("Modelled: " + ("mains water" if name == "water_kl" else "rainwater offset"), energy[name] / 1000, "million litres/year", "Computed using indicative end-use assumptions")
             else:
                 add("Modelled: " + name, energy[name], "see quantity name / year", "Computed using indicative end-use assumptions")
     if p.gas_mj:
