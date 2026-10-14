@@ -1175,6 +1175,32 @@
   line-height: 1.5;
 }
 
+/* The saving row carries a value plus a parenthetical qualifier. Forcing both
+   onto one line (nowrap on the value, `auto` value column) squeezed the label
+   to one word per line and let the value overflow the card on phones. Below
+   560px stack the label over the value and let the qualifier wrap. */
+@media (max-width: 560px) {
+  .gc-outcome-head {
+    flex-direction: column;
+    gap: var(--s-1);
+  }
+
+  .gc-outcome-rows > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-2);
+  }
+
+  .gc-outcome-rows dd {
+    white-space: normal;
+  }
+
+  /* Keep the amount itself unbroken while the qualifier wraps. */
+  .gc-outcome-rows dd > small {
+    display: block;
+    white-space: normal;
+  }
+}
+
 /* --------------------------------------------------------------------------
    Closing band
    The method link and the primary call to action share one section. As two
