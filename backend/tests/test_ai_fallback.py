@@ -91,7 +91,31 @@ def test_reasoning_models_leave_budget_for_final_answer(monkeypatch):
         assert payload["include_reasoning"] is False
         assert payload["max_tokens"] == 4096
         ai.chat("openrouter", "system", CONTEXT, 12)
-        assert request.call_args.kwargs["json"]["reasoning"] == {"effort": "low", "max_tokens": 512, "exclude": True}
+        assert request.call_args.kwargs["json"]["reasoning"] == {"effort": "low", "exclude": True}
+
+
+def test_openrouter_never_sends_two_reasoning_controls(monkeypatch):
+    # OpenRouter rejects a request that sets both reasoning.effort and
+    # reasoning.max_tokens with HTTP 400, so only one control may be sent.
+    keys(monkeypatch)
+    monkeypatch.setenv("OPENROUTER_MODEL", "openrouter/free")
+    with patch.object(ai.httpx, "post", return_value=reply()) as request:
+        ai.chat("openrouter", "system", CONTEXT, 12)
+        reasoning = request.call_args.kwargs["json"]["reasoning"]
+        assert not ("effort" in reasoning and "max_tokens" in reasoning)
+
+
+def test_rejected_request_is_reported_without_masking_as_unavailable(monkeypatch):
+    keys(monkeypatch)
+    rejected = httpx.Response(400, request=httpx.Request("POST", "https://openrouter.ai"),
+                              json={"error": {"message": "Only one reasoning control may be set", "code": 400}})
+    with patch.object(ai.gemini, "generate", return_value=(None, 1, "provider_busy")) as gemini, \
+         patch.object(ai.httpx, "post", return_value=rejected) as request:
+        ai.generate("system", CONTEXT)
+        assert request.call_count == 2
+        gemini.assert_called_once()
+    assert ai.trace()["openrouter"] == "invalid_output"
+    assert ai.trace()["openrouter"] != "unavailable"
 
 
 def test_blank_model_settings_use_provider_defaults(monkeypatch):
@@ -112,7 +136,7 @@ def test_blank_gemini_model_uses_default(monkeypatch):
                               json={"candidates": [{"content": {"parts": [{"text": TEXT}]}}]})
     with patch.object(ai.gemini.httpx, "post", return_value=response) as request:
         assert ai.gemini.generate("system", CONTEXT) == (TEXT, 1, "complete")
-    assert "/gemini-3.8-flash:generateContent" in request.call_args.args[0]
+    assert "/gemini-3.5-flash-lite:generateContent" in request.call_args.args[0]
 
 
 def test_other_groq_models_do_not_receive_unsupported_reasoning_setting(monkeypatch):

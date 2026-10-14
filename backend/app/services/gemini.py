@@ -15,7 +15,7 @@ def generate(system: str, context: str, timeout: float = 30):
         return None, 0, "not_configured"
     if not reserve("gemini"):
         return None, 0, "budget_or_host_limit"
-    model = os.getenv("GEMINI_MODEL", "").strip() or "gemini-3.8-flash"
+    model = os.getenv("GEMINI_MODEL", "").strip() or "gemini-3.5-flash-lite"
     if not re.fullmatch(r"[a-zA-Z0-9._-]+", model):
         return None, 0, "invalid_model"
     generation_config = {"temperature": 1.0 if model.startswith("gemini-3") else 0.2,

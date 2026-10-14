@@ -86,8 +86,10 @@ def chat(provider, system, context, timeout):
         payload.update(reasoning_effort="low", include_reasoning=False)
     elif provider == "openrouter":
         # Keep free reasoning models from spending the whole completion budget
-        # before they produce the short user-facing explanation.
-        payload["reasoning"] = {"effort": "low", "max_tokens": 512, "exclude": True}
+        # before they produce the short user-facing explanation. OpenRouter
+        # rejects a request that sets both reasoning.effort and
+        # reasoning.max_tokens, so only the effort hint is sent.
+        payload["reasoning"] = {"effort": "low", "exclude": True}
     try:
         r = httpx.post(url, headers={"Authorization": "Bearer " + key},
                        json=payload, timeout=timeout)
@@ -114,7 +116,7 @@ def chat(provider, system, context, timeout):
             text = content
         return (text, 1, "complete") if isinstance(text, str) and text.strip() else (None, 1, "empty_response")
     except httpx.HTTPStatusError as e:
-        return None, 1, {401: "invalid_key", 402: "quota_reached", 403: "permission_denied", 404: "model_unavailable", 429: "quota_reached", 503: "provider_busy"}.get(e.response.status_code, "unavailable")
+        return None, 1, {400: "invalid_output", 401: "invalid_key", 402: "quota_reached", 403: "permission_denied", 404: "model_unavailable", 429: "quota_reached", 503: "provider_busy"}.get(e.response.status_code, "unavailable")
     except (httpx.HTTPError, KeyError, IndexError, TypeError, ValueError, AttributeError):
         return None, 1, "unavailable"
 
