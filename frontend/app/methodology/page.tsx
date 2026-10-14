@@ -31,8 +31,9 @@ export default function Methodology(){
    <p>GreenCost compares conventional and sustainable building designs over 30, 40 or 50 years using Sydney reference rates and the assumptions you provide.</p>
   </header>
   <section className="method-summary" aria-labelledby="method-summary-title">
-   <h2 id="method-summary-title">In 30 seconds</h2>
-   <p>Use GreenCost to compare indicative whole-life costs in Australian dollars (AUD). It shows how your inputs affect the result, with sources and assumptions available to review.</p>
+   <h2 id="method-summary-title">What this tool does, and what it needs from you</h2>
+   <p>GreenCost compares a conventional and a sustainable specification for the same building, over 30, 40 or 50 years, in today’s Australian dollars. Every figure comes from the inputs you enter and the dated Sydney references listed on this page — nothing is estimated by a black box.</p>
+   <p>You will need a few numbers to get a useful result: floor area, a construction budget or quote, and a recent energy and water bill. Without them the comparison still runs, but it relies on assumed rates rather than your building.</p>
    <p><b>It does not</b> provide a construction quote, financial advice, energy rating, or building-code assessment.</p>
   </section>
   <div className="method-layout">
