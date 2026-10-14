@@ -44,8 +44,9 @@ def test_water_units_and_maintenance_labels_in_export_are_consistent():
     assert water['value'] == .5 and water['unit'] == 'million litres/year'
     assert not any(a['unit'] == 'L/year' for a in result['assumptions'])
     text = '\n'.join(p.extract_text() for p in PdfReader(io.BytesIO(pdf_report(result, 40))).pages)
-    assert '0.5 million litres/year' in text
-    assert 'Indicative planning tool. Not a quotation, financial advice, or a NatHERS/BASIX assessment.' in text
+    flat = ' '.join(text.split())
+    assert '0.5 million litres/year' in flat
+    assert 'Indicative planning tool. Not a quotation, financial advice, or a NatHERS/BASIX assessment.' in flat
     assert 'Initial building cost' in text
     assert 'Routine maintenance over 40 years' in text
 
