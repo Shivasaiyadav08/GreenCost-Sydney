@@ -236,7 +236,7 @@ M.binY=new THREE.MeshStandardMaterial({color:0xd9b32a,roughness:.8});
 M.binR=new THREE.MeshStandardMaterial({color:0xb3382c,roughness:.8});
 M.cloud=new THREE.MeshStandardMaterial({color:0xffffff,roughness:1,transparent:true,opacity:.7,flatShading:true});
 var numTex=canvasTex(64,64,function(g,w,h){g.fillStyle='#2a3532';g.fillRect(0,0,w,h);g.fillStyle='#fff';g.font='bold 40px Georgia,serif';g.textAlign='center';g.textBaseline='middle';g.fillText('24',w/2,h/2+2);});
-var fasciaTex=canvasTex(1024,57,function(g,w,h){g.fillStyle='#1f6b4a';g.fillRect(0,0,w,h);g.fillStyle='#fff';g.font='italic 38px Georgia,serif';g.textAlign='center';g.textBaseline='middle';g.fillText('GreenCost & Co.',w/2,h/2+2);});
+var fasciaTex=canvasTex(1024,57,function(g,w,h){g.fillStyle='#1d6a4b';g.fillRect(0,0,w,h);g.fillStyle='#fff';g.font='italic 38px Georgia,serif';g.textAlign='center';g.textBaseline='middle';g.fillText('GreenCost & Co.',w/2,h/2+2);});
 var openTex=canvasTex(128,64,function(g,w,h){g.fillStyle='#1b2523';g.fillRect(0,0,w,h);g.strokeStyle='#ff7b7b';g.lineWidth=3;g.strokeRect(4,4,w-8,h-8);g.fillStyle='#ff7b7b';g.font='bold 34px Arial,sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText('OPEN',w/2,h/2+2);});
 M.fascia=new THREE.MeshStandardMaterial({map:fasciaTex,roughness:.6});
 M.open=new THREE.MeshStandardMaterial({map:openTex,emissiveMap:openTex,emissive:0xffffff,emissiveIntensity:.12,roughness:.5});

@@ -4,16 +4,29 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>GreenCost live model</title>
+<script>
+// The parent page passes its resolved theme so this document matches it
+// exactly, including an explicit override of the operating-system preference.
+// Runs in head, before paint, so there is no flash of the wrong palette.
+(function(){
+  try{
+    var t=new URLSearchParams(location.search).get('theme');
+    if(t==='dark'||t==='light'){document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t;}
+  }catch(e){}
+})();
+</script>
 <style>
-:root{--bg:#f4f2ec;--card:#fff;--ink:#14201b;--mute:#5d6b64;--line:#dfe3dd;--g:#1f6b4a;box-sizing:border-box}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1512;--card:#17211c;--ink:#e9efe9;--mute:#9aa9a1;--line:#27342d;--g:#4fb386}}
-:root[data-theme="dark"]{--bg:#0e1512;--card:#17211c;--ink:#e9efe9;--mute:#9aa9a1;--line:#27342d;--g:#4fb386}
+:root{--bg:#ffffff;--card:#ffffff;--ink:#14201b;--mute:#5d6b64;--line:#dfe3dd;--g:#1d6a4b;--raised:#f6f5f1;--pill:#ffffff;box-sizing:border-box}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1512;--card:#17211c;--ink:#e9efe9;--mute:#9aa9a1;--line:#27342d;--g:#5cae8c;--raised:#1c2822;--pill:#1c2822}}
+:root[data-theme="dark"]{--bg:#0e1512;--card:#17211c;--ink:#e9efe9;--mute:#9aa9a1;--line:#27342d;--g:#5cae8c;--raised:#1c2822;--pill:#1c2822}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden;background:var(--card);color:var(--ink);
   font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
 /* The embed fills the iframe exactly: type bar on top, stage takes the
-   remaining space, control bar at the bottom. */
-.card{width:100%;height:100%;display:flex;flex-direction:column}
+   remaining space, control bar at the bottom. The card carries the site's
+   surface colour so both bars sit on a real background rather than floating
+   transparently over the scene, which read as dark slabs in light mode. */
+.card{width:100%;height:100%;display:flex;flex-direction:column;background:var(--card)}
 .stage{position:relative;flex:1;min-height:0;cursor:grab;touch-action:none;overflow:hidden;transition:background .6s}
 .stage.day{background:linear-gradient(180deg,#bfe0ee 0%,#e6f0ea 58%,#dfe9d9 100%)}
 .stage.night{background:linear-gradient(180deg,#09111f 0%,#16243a 60%,#1b2b35 100%)}
@@ -31,19 +44,26 @@ canvas{display:block;width:100%;height:100%}
 .pin small{color:var(--mute);font-size:11px}
 .hint{position:absolute;right:12px;bottom:10px;font-size:11px;color:#fff;background:rgba(0,0,0,.35);
   padding:4px 10px;border-radius:999px;pointer-events:none}
-.bar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;padding:10px 14px;border-top:1px solid var(--line)}
+.bar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;padding:12px 16px;background:var(--card);
+  border-top:1px solid var(--line)}
 .grp{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mute)}
-button{font:inherit;font-size:13px;color:var(--ink);background:transparent;border:1px solid var(--line);
-  border-radius:999px;padding:7px 14px;cursor:pointer;min-height:36px}
-button:hover{border-color:var(--g)}
+/* Buttons sit on the card surface rather than transparent: a transparent
+   control over the scene image read as a dark slab and made the pressed and
+   resting states hard to tell apart. */
+button{font:inherit;font-size:13px;color:var(--ink);background:var(--pill);border:1px solid var(--line);
+  border-radius:999px;padding:7px 14px;cursor:pointer;min-height:36px;transition:background-color .15s,border-color .15s,color .15s}
+button:hover{border-color:var(--g);background:var(--raised)}
 button:focus-visible{outline:2px solid var(--g);outline-offset:2px}
+/* Pressed controls use the accent fill so on/off is unmistakable. */
 button[aria-pressed="true"]{background:var(--g);color:#fff;border-color:var(--g)}
 .step{width:36px;padding:0;font-size:16px}
 .val{min-width:14px;text-align:center;color:var(--ink);font-weight:600}
 .seg-bar{border-top:0;border-bottom:1px solid var(--line)}
 .seg{display:flex;gap:8px;width:100%}
-.seg button{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:14px;padding:10px 12px}
+.seg button{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;padding:10px 12px}
 .seg svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+/* The selected building type uses a tinted fill rather than a solid accent so
+   it reads as a selection inside a group, not as the page's main action. */
 .seg button[aria-pressed="true"]{background:color-mix(in srgb,var(--g) 14%,var(--card));color:var(--g);border-color:var(--g)}
 @media (max-width:520px){.pin small{display:none}.seg button span{font-size:12px}.seg svg{display:none}}
 </style>

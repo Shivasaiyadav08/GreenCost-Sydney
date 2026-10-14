@@ -7,8 +7,8 @@ export const contentType='image/png';
 export default function OpenGraphImage(){
   return new ImageResponse(
     <div style={{width:'100%',height:'100%',display:'flex',flexDirection:'column',justifyContent:'space-between',padding:'72px',background:'#f7f8f2',color:'#17251d',fontFamily:'Arial,sans-serif'}}>
-      <div style={{display:'flex',alignItems:'center',gap:18,color:'#1f6b4a',fontSize:25,fontWeight:700}}>
-        <div style={{width:52,height:52,display:'flex',alignItems:'center',justifyContent:'center',borderRadius:14,background:'#1f6b4a',color:'#fff'}}>
+      <div style={{display:'flex',alignItems:'center',gap:18,color:'#1d6a4b',fontSize:25,fontWeight:700}}>
+        <div style={{width:52,height:52,display:'flex',alignItems:'center',justifyContent:'center',borderRadius:14,background:'#1d6a4b',color:'#fff'}}>
           <span>G</span>
         </div>
         <span>GREEN COST · SYDNEY, NSW</span>

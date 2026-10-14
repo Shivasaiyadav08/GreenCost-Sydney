@@ -154,15 +154,18 @@
   transition: transform var(--t-base) var(--ease);
 }
 
+/* The primary action carries the brand colour. It was ink black at rest and
+   only turned green on hover, so the product's main call to action looked like
+   a neutral control and only revealed the identity on interaction. */
 .gc-btn-primary {
-  background: var(--ink);
-  color: var(--canvas);
-  border-color: var(--ink);
+  background: var(--forest);
+  color: var(--forest-ink);
+  border-color: var(--forest);
 }
 
 .gc-btn-primary:hover {
-  background: var(--forest);
-  border-color: var(--forest);
+  background: var(--forest-hover);
+  border-color: var(--forest-hover);
 }
 
 .gc-btn-primary:hover svg {

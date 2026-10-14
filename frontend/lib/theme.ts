@@ -47,8 +47,8 @@ export function useTheme(): Theme {
 }
 
 export const chartPalette = {
- light: {sustainable:'#00753e', conventional:'#b85b25', grid:'#deded7', text:'#62695f', surface:'#fffefa', foreground:'#222820', components:['#00753e','#d28249','#7f9f6a','#b2b879','#5c8f94','#aa8b62','#7e827b','#b47f87']},
- dark: {sustainable:'#98c56e', conventional:'#e5a16c', grid:'#30382e', text:'#a5ada1', surface:'#151815', foreground:'#f7f7f2', components:['#98c56e','#e5a16c','#72996b','#ced68d','#78b2b8','#baa17b','#a0a59b','#d69ca5']},
+  light: {sustainable:'#1d6a4b', conventional:'#8a8880', grid:'#deded7', text:'#62695f', surface:'#ffffff', foreground:'#222820', components:['#1d6a4b','#6f9b83','#9db8a4','#bcae86','#8f9aa3','#a89b8c','#7e827b','#b47f87']},
+  dark: {sustainable:'#5cae8c', conventional:'#8f9a93', grid:'#30382e', text:'#a5ada1', surface:'#151815', foreground:'#f7f7f2', components:['#5cae8c','#7fbfa0','#a3cfb5','#c0b48f','#93a3ab','#b0a293','#a0a59b','#c99aa3']},
 };
 
 export const compactMoney = formatCompactAUD;
