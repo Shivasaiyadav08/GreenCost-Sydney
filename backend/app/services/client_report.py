@@ -5,6 +5,127 @@ from backend.app.services.formatting import format_australian_date, format_numbe
 LABELS = {"capital": "Initial building cost", "energy": "Electricity and gas", "water": "Water and service charges", "maintenance": "Routine maintenance", "replacement": "Equipment replacements", "other": "Other running costs", "disposal": "End-of-period removal", "residual": "Recovered-material credit"}
 
 
+def _strip_years(years):
+    """A readable sample of years rather than all 41 rows.
+
+    Always includes year 1, the terminal year, and whatever crossover years the
+    caller needs; the rest are a spread that shows the shape of the curve.
+    """
+    picks = [y for y in (1, 5, 10, 15, 20, 30, 40, 50) if y <= years]
+    if years not in picks:
+        picks.append(years)
+    return sorted(set(picks))
+
+
+def build_payback_strip(period, years):
+    """Year-by-year cumulative advantage, so the payback year is shown, not asserted.
+
+    Percentages are guarded: if one side is zero the difference is not a
+    percentage of anything, so the share is left out rather than shown as a
+    meaningless figure.
+    """
+    c, s = period["conventional"], period["sustainable"]
+    flows_c, flows_s = c.get("cashflows") or [], s.get("cashflows") or []
+    if not flows_c or not flows_s:
+        return None
+    crossover = period.get("break_even_year")
+    reversals = set(period.get("reversal_years") or [])
+    rows = []
+    for y in _strip_years(years):
+        i = y
+        if i >= len(flows_c) or i >= len(flows_s):
+            continue
+        cum_c = flows_c[i].get("cumulative_pv", 0.0)
+        cum_s = flows_s[i].get("cumulative_pv", 0.0)
+        advantage = cum_c - cum_s
+        base = abs(cum_c)
+        share = (advantage / base * 100) if base > 1 else None
+        spend_s = flows_s[i].get("pv_total", 0.0)
+        spend_c = flows_c[i].get("pv_total", 0.0)
+        rows.append(
+            dict(
+                year=y,
+                cumulative_conventional=cum_c,
+                cumulative_sustainable=cum_s,
+                advantage=advantage,
+                advantage_share=share,
+                spend_conventional=spend_c,
+                spend_sustainable=spend_s,
+                crossover=(y == crossover),
+                reversal=(y in reversals),
+            )
+        )
+    if not rows:
+        return None
+    events = [r for r in rows if r["crossover"] or r["reversal"]]
+    return dict(rows=rows, crossover_year=crossover, reversal_years=sorted(reversals), markers=events)
+
+
+def build_replacement_schedule(result, period, years):
+    """Itemised equipment replacements, expanded to every year they are charged.
+
+    The engine recurs each item on its own interval, so a 40-year study charges
+    a 12-year inverter three times. Listing each occurrence keeps the schedule
+    consistent with the lumped replacement total instead of understating it.
+    Items whose replacement falls on or after the terminal year are excluded by
+    the engine, so they are excluded here too.
+    """
+    items = []
+    for m in result.get("measures", []):
+        scale = m.get("scale", 1) or 1
+        block = m.get("replacements") or {}
+        for scenario, key in (("conventional", "baseline"), ("sustainable", "upgrade")):
+            for entry in block.get(key) or []:
+                try:
+                    interval = int(entry.get("year") or 0)
+                    cost = float(entry.get("default") or 0) * scale
+                except (TypeError, ValueError):
+                    continue
+                if interval <= 0 or cost <= 0:
+                    continue
+                for year in range(interval, years, interval):
+                    items.append(
+                        dict(
+                            year=year,
+                            name=m.get("name", m.get("id", "Equipment")),
+                            scenario=scenario,
+                            cost=cost,
+                            interval=interval,
+                        )
+                    )
+    for rep in result.get("project", {}).get("replacements", []) or []:
+        try:
+            interval = int(getattr(rep, "interval", None) or (rep.get("interval") if isinstance(rep, dict) else 0) or 0)
+            cost = float(getattr(rep, "cost", None) or (rep.get("cost") if isinstance(rep, dict) else 0) or 0)
+            name = getattr(rep, "name", None) or (rep.get("name") if isinstance(rep, dict) else None) or "Equipment"
+            scope = getattr(rep, "scenario", None) or (rep.get("scenario") if isinstance(rep, dict) else None) or "both"
+        except (TypeError, ValueError):
+            continue
+        if interval <= 0 or cost <= 0:
+            continue
+        for scenario in ("conventional", "sustainable"):
+            if scope not in ("both", scenario):
+                continue
+            for year in range(interval, years, interval):
+                items.append(dict(year=year, name=name, scenario=scenario, cost=cost, interval=interval))
+    if not items:
+        return None
+    items.sort(key=lambda i: (i["year"], i["name"]))
+    sustainable = [i for i in items if i["scenario"] == "sustainable"]
+    conventional = [i for i in items if i["scenario"] == "conventional"]
+    # Only sustainable-only items are worth naming; shared items are the same
+    # cost in both designs and are summarised instead of listed twice.
+    return dict(
+        items=items,
+        sustainable=sustainable,
+        conventional=conventional,
+        first_year=items[0]["year"],
+        last_year=items[-1]["year"],
+        occurrences=len(items),
+        intervals=sorted({i["interval"] for i in items}),
+    )
+
+
 def report_content(result, years):
     p = result["project"]
     r = result["periods"][str(years)]
@@ -42,6 +163,8 @@ def report_content(result, years):
     warning += " Indicative planning tool. Not a quotation, financial advice, or a NatHERS/BASIX assessment."
     from backend.app.services.catalogue import catalogue
     descriptions = {m["id"]:m.get("plain_description", "") for m in catalogue()}
+    payback = build_payback_strip(r, years)
+    replacements = build_replacement_schedule(result, r, years)
     upgrades = []
     for m in result.get("measures", []):
         description = descriptions.get(m["id"], "Review this feature against your baseline specification.")
@@ -62,4 +185,4 @@ def report_content(result, years):
         narrative.append("The sustainable design uses the construction and running-cost assumptions entered for this project. No individually priced upgrades were selected.")
     narrative.append(f"The conventional design starts at {money(c['components']['capital'])}, while the sustainable design starts at {money(s['components']['capital'])}. Including running costs, maintenance, replacements and end-of-period costs, the {years}-year totals are {money(c['total_lcc'])} and {money(s['total_lcc'])}, respectively, in today's equivalent money. " + verdict)
     narrative.append(" ".join(findings[1:]))
-    return dict(upgrades=upgrades, project=p, period=r, verdict=verdict, findings=findings, project_explanation=narrative, inputs=inputs, robustness=robustness, next_steps=next_steps, warning=warning)
+    return dict(upgrades=upgrades, project=p, period=r, verdict=verdict, findings=findings, project_explanation=narrative, inputs=inputs, robustness=robustness, next_steps=next_steps, warning=warning, payback=payback, replacements=replacements, commentary=(r.get("explanation") or [])[4:] if r.get("explanation") else [])

@@ -45,7 +45,10 @@ def test_export_explains_project_without_provider_metadata_or_external_calls():
         assert "Routine maintenance costs are the same" in text
         assert "Complete input record" not in text
         assert "quantity overrides" not in text
-        assert len(reader.pages) == 5
+        # The report carries a payback strip and a replacement schedule, so it is
+        # longer than the original five pages. Bound it so a layout regression
+        # that spills tables onto new pages still fails this test.
+        assert 5 <= len(reader.pages) <= 6
         from backend.app.services.explanation import money
 
         assert money(result["periods"]["40"]["sustainable"]["total_lcc"]) in text
@@ -114,8 +117,54 @@ def test_report_replaces_metadata_reply_with_actual_project_and_names_download()
     assert "User Safety" not in text
     assert "Courtyard House is a house" in text
     assert "Rooftop solar" in text and "6.6 kW" in text
-    assert len(reader.pages) == 5
+    # Bounded, not fixed: the added tables must not push the report past six pages.
+    assert 5 <= len(reader.pages) <= 6
     assert "Courtyard House" in reader.metadata.title
+
+
+def test_payback_strip_and_replacement_schedule_are_calculated_not_asserted():
+    from backend.app.services.client_report import report_content
+
+    result, _ = snapshot()
+    view = report_content(result, 40)
+    payback = view["payback"]
+    assert payback is not None
+    assert payback["crossover_year"] == 10
+    rows = {row["year"]: row for row in payback["rows"]}
+    # Year 1 is behind, the crossover year is ahead, and the strip ends at the
+    # terminal year: the strip must actually show the transition.
+    assert rows[1]["advantage"] < 0 < rows[10]["advantage"]
+    assert rows[40]["advantage"] > rows[10]["advantage"]
+    assert payback["markers"], "the crossover year must be flagged for emphasis"
+
+    replacements = view["replacements"]
+    assert replacements is not None
+    assert replacements["occurrences"] == len(replacements["items"])
+    for item in replacements["items"]:
+        assert item["year"] < 40, "no replacement may be charged in the terminal year"
+        assert item["cost"] > 0
+
+    text = "".join(p.extract_text() for p in PdfReader(io.BytesIO(pdf_report(result, 40))).pages)
+    assert "When the sustainable design catches up" in text
+    assert "Planned equipment replacements" in text
+    assert "Rooftop solar" in text and "Rainwater tank" in text
+
+
+def test_payback_strip_omits_share_when_base_is_zero():
+    from backend.app.services.client_report import build_payback_strip
+
+    period = dict(
+        years=2,
+        break_even_year=None,
+        reversal_years=[],
+        conventional=dict(cashflows=[dict(cumulative_pv=0.0, pv_total=0.0)] * 3),
+        sustainable=dict(cashflows=[dict(cumulative_pv=100.0, pv_total=10.0)] * 3),
+    )
+    strip = build_payback_strip(period, 2)
+    assert strip is not None
+    # A percentage of zero is meaningless, so the share must be dropped rather
+    # than reported as an infinite or zero figure.
+    assert all(row["advantage_share"] is None for row in strip["rows"])
 
 
 def test_report_names_handle_unicode_empty_and_unsafe_characters():

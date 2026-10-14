@@ -78,6 +78,11 @@ def report_html(result, years):
         + text("Your project explained")
         + "</h2>"
         + "".join(para(t) for t in v["project_explanation"])
+        + (
+            "<h2>What this means in practice</h2>" + "".join(para(t) for t in v["commentary"])
+            if v.get("commentary")
+            else ""
+        )
         + "<h2>Where your money goes</h2>"
     )
     body += table(
@@ -90,6 +95,56 @@ def report_html(result, years):
     body += para(
         "All future costs show today's equivalent value. Recovered-material value is a credit. Electricity includes supply charges and any modelled solar export credit."
     )
+    if v.get("payback"):
+        pb = v["payback"]
+        rows = []
+        for row in pb["rows"]:
+            note = " (first year ahead)" if row["crossover"] else " (advantage reverses)" if row["reversal"] else ""
+            share = f" ({row['advantage_share']:.1f}%)" if row["advantage_share"] is not None else ""
+            rows.append(
+                [
+                    f"Year {row['year']}",
+                    money(row["cumulative_conventional"]),
+                    money(row["cumulative_sustainable"]),
+                    f"{money(abs(row['advantage']))} {'less' if row['advantage'] >= 0 else 'more'}{note}{share}",
+                ]
+            )
+        body += (
+            "<h2>When the sustainable design catches up</h2>"
+            + para(
+                "Each row is the running total of every cost up to that year, in today's equivalent value. "
+                + (
+                    f"The advantage first appears in year {pb['crossover_year']} and is still present at year {years}."
+                    if pb["crossover_year"] is not None and not pb["reversal_years"]
+                    else f"The advantage first appears in year {pb['crossover_year']} but does not hold for the whole period."
+                    if pb["crossover_year"] is not None
+                    else f"The sustainable design does not catch up within {years} years."
+                )
+            )
+            + table(["Year", "Conventional to date", "Sustainable to date", "Difference"], rows)
+        )
+    if v.get("replacements"):
+        rep = v["replacements"]
+        body += (
+            "<h2>Planned equipment replacements</h2>"
+            + para(
+                f"Equipment is replaced on its own service interval, so the same item is charged more than once. "
+                f"{rep['occurrences']} replacement event(s) fall between year {rep['first_year']} and year {rep['last_year']}; "
+                "each is already included in the totals, and none is added at the final year."
+            )
+            + table(
+                ["Year", "Item", "Applies to", "Today's cost"],
+                [
+                    [
+                        str(item["year"]),
+                        item["name"],
+                        "Both designs" if item["scenario"] == "conventional" else "Sustainable",
+                        money(item["cost"]),
+                    ]
+                    for item in rep["items"][:14]
+                ],
+            )
+        )
     if result.get("measures"):
         body += (
             "<h2>The upgrades you selected</h2>"
