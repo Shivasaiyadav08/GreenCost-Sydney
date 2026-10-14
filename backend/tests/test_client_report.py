@@ -8,6 +8,60 @@ from backend.app.services.pdf_report import pdf_report
 client = TestClient(app)
 TEXT = "Insulation helps keep the home comfortable. Confirm the installed quote with your builder. [S1]"
 
+# A page must clear this many characters of extractable text. A page holding only
+# a heading, a stray table row or a footnote falls far below it; the shortest
+# legitimate page in this report carries several paragraphs.
+MIN_PAGE_CHARS = 200
+
+
+def assert_report_pages_are_filled(reader):
+    """No page may be near-empty and no heading may be stranded on its own.
+
+    Counting pages only catches gross overflow. It missed a real defect where a
+    table was pushed past a heading onto its own page, leaving a titleless table
+    above a large blank space. Checking the content of each page catches that:
+    a page below the text threshold is a layout fault however many pages there
+    are, and a heading with no following line means it was separated from the
+    content it introduces.
+    """
+    for number, page in enumerate(reader.pages, 1):
+        lines = [line.strip() for line in page.extract_text().splitlines() if line.strip()]
+        # Drop the running header: the brand line and the page number.
+        body = [line for line in lines if line != "GreenCost | Planning estimate | AUD" and not line.startswith("Page ")]
+        characters = len("".join(body))
+        assert characters >= MIN_PAGE_CHARS, (
+            f"page {number} holds only {characters} characters; "
+            f"content is likely stranded on a page of its own: {body[:4]}"
+        )
+        for index, line in enumerate(body):
+            # A heading must be followed by something: prose, a table header or a
+            # row. If it is the final line on the page its content went overleaf.
+            if line in HEADINGS:
+                assert index + 1 < len(body), f"heading {line!r} is the last content on page {number}"
+
+
+HEADINGS = {
+    "Your building cost comparison",
+    "Why the costs differ",
+    "Costs and decision checks",
+    "Your assumptions and next steps",
+    "Evidence and report notes",
+    "When the sustainable design catches up",
+    "Planned equipment replacements",
+    "Could the answer change?",
+    "What this means in practice",
+    "What this means for your decision",
+    "Your project explained",
+    "The upgrades you selected",
+    "Your key inputs",
+    "Before committing to the design",
+    "Utility and cost references",
+    "Supporting research",
+    "What this report can and cannot tell you",
+    "Where your money goes",
+    "Your construction budget range",
+}
+
 
 def snapshot():
     result = client.post("/api/analyse", json=client.get("/api/demo").json()).json()
@@ -49,6 +103,7 @@ def test_export_explains_project_without_provider_metadata_or_external_calls():
         # longer than the original five pages. Bound it so a layout regression
         # that spills tables onto new pages still fails this test.
         assert 5 <= len(reader.pages) <= 6
+        assert_report_pages_are_filled(reader)
         from backend.app.services.explanation import money
 
         assert money(result["periods"]["40"]["sustainable"]["total_lcc"]) in text
@@ -119,6 +174,7 @@ def test_report_replaces_metadata_reply_with_actual_project_and_names_download()
     assert "Rooftop solar" in text and "6.6 kW" in text
     # Bounded, not fixed: the added tables must not push the report past six pages.
     assert 5 <= len(reader.pages) <= 6
+    assert_report_pages_are_filled(reader)
     assert "Courtyard House" in reader.metadata.title
 
 
