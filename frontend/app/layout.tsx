@@ -11,11 +11,16 @@ import './tensor-theme.css';
 import './ui-layer.css';
 import './forms.css';
 import './light-surfaces.css';
+import './detailed-costs.css';
 import {themeInitialization} from '@/lib/theme-initialization';
 
 export const metadata:Metadata={
-  title:'GreenCost — Build better. Spend smarter.',
-  description:'An auditable life-cycle cost comparison of conventional and sustainable buildings under Sydney conditions.',
+  metadataBase:new URL('https://green-cost-sydney.vercel.app'),
+  title:'GreenCost: Sydney building life-cycle cost comparison (AUD)',
+  description:'Compare conventional and sustainable building costs in Sydney, NSW over 30, 40 or 50 years. Transparent estimates, sources and Australian-dollar results.',
+  alternates:{canonical:'/'},
+  openGraph:{type:'website',locale:'en_AU',url:'/',siteName:'GreenCost Sydney',title:'GreenCost: Sydney building life-cycle cost comparison (AUD)',description:'Compare whole-life building costs in Sydney, NSW with transparent assumptions and sources.'},
+  twitter:{card:'summary_large_image',title:'GreenCost Sydney building cost comparison',description:'Compare conventional and sustainable building costs in AUD.',images:['/opengraph-image']},
   icons:{icon:'/favicon.svg'},
 };
 
