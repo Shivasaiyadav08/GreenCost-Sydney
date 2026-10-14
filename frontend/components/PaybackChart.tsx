@@ -153,6 +153,7 @@ export default function PaybackChart() {
       <ul className="gc-chart-legend">
         <li><i className="gc-key gc-key--conventional"/>Conventional</li>
         <li><i className="gc-key gc-key--sustainable"/>Sustainable</li>
+        <li><i className="gc-key gc-key--crossover"/>Break-even in year 10</li>
       </ul>
     </figure>
   );

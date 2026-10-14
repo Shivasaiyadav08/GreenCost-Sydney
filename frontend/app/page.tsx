@@ -159,7 +159,7 @@ export default function Home(){
                   <dt>Study period</dt>
                   <dd>40 years</dd>
                 </div>
-                <div>
+                <div className="is-recovered">
                   <dt>Premium recovered</dt>
                   <dd>{SAMPLE.payback}</dd>
                 </div>
@@ -173,19 +173,19 @@ export default function Home(){
               </div>
 
               <dl className="gc-outcome-rows">
-                <div>
+                <div className="is-baseline">
                   <dt>Conventional — whole-life cost</dt>
                   <dd>{SAMPLE.conventional}</dd>
                 </div>
-                <div>
+                <div className="is-save">
                   <dt>Sustainable — whole-life cost</dt>
                   <dd>{SAMPLE.sustainable}</dd>
                 </div>
-                <div className="is-save">
+                <div className="is-save is-headline">
                   <dt>Net saving over the period</dt>
                   <dd>{SAMPLE.saving} <small>({SAMPLE.savingShare} of the conventional total)</small></dd>
                 </div>
-                <div>
+                <div className="is-premium">
                   <dt>Additional cost on day one</dt>
                   <dd>{SAMPLE.premium}</dd>
                 </div>

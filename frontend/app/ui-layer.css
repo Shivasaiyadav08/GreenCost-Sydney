@@ -74,6 +74,18 @@
 .contribution-table tbody tr.row-saving{background:color-mix(in srgb, var(--gc-positive) 5%, transparent)}
 .contribution-table tbody tr.row-cost{background:color-mix(in srgb, var(--gc-negative) 5%, transparent)}
 @media(max-width:700px){.contribution-table .cell-signed{font-weight:var(--weight-medium)}}
+/* The marginal table sits below the chart and had three unsigned columns of
+   equal-weight money, so a measure that costs money looked like one that saves
+   it. Same vocabulary as the contribution table above it. */
+.contribution-marginal-table .cell-category{font-weight:var(--weight-medium)}
+.contribution-marginal-table .cell-figure{font-variant-numeric:tabular-nums}
+.contribution-marginal-table .cell-signed{font-weight:var(--weight-semibold)}
+.contribution-marginal-table .cell-signed.is-saving{color:var(--gc-positive)}
+.contribution-marginal-table .cell-signed.is-cost{color:var(--gc-negative)}
+.contribution-marginal-table .cell-signed.is-neutral{color:var(--gc-muted);font-weight:var(--weight-regular)}
+.contribution-marginal-table tbody tr.row-saving{background:color-mix(in srgb, var(--gc-positive) 5%, transparent)}
+.contribution-marginal-table tbody tr.row-cost{background:color-mix(in srgb, var(--gc-negative) 5%, transparent)}
+@media(max-width:700px){.contribution-marginal-table .cell-signed{font-weight:var(--weight-medium)}}
 
 /* ---------- Sensitivity: the heatmap had one flat tint for every cell ----------
    A A$52k saving and a A$11k saving rendered identically, so the reader could not
@@ -146,6 +158,64 @@
 .result-empty.is-compact{padding-top:44px;padding-bottom:48px}
 .result-empty .ui-empty-steps>li{display:inline-flex;align-items:center;gap:8px;padding:7px 14px 7px 9px;border:1px solid var(--gc-line);border-radius:var(--r-pill);background:var(--gc-raised);font-size:var(--t-small);font-weight:var(--weight-medium);color:var(--gc-text);white-space:nowrap}
 .result-empty .ui-empty-steps>li::before{content:"";width:15px;height:15px;flex-shrink:0;border-radius:50%;background:var(--gc-accent);box-shadow:inset 0 0 0 4px var(--gc-accent-soft)}
+/* ---------- Landing: the worked example is where the argument lands ----------
+   The four outcome rows carried one green figure and three grey ones, so the
+   side-by-side totals read as equal-weight numbers and the day-one premium was
+   indistinguishable from the saving it buys. Tone now follows the meaning:
+   the conventional total is the baseline, the sustainable total and the net
+   saving are the gains, and the premium is the cost those gains require. */
+.gc-outcome-rows .is-save dd{color:var(--gc-positive)}
+.gc-outcome-rows .is-premium dd{color:var(--gc-negative)}
+.gc-outcome-rows .is-baseline dd{color:var(--gc-text)}
+/* The net saving is the figure the section exists to deliver, so it keeps the
+   strip and a touch more weight without growing the type size. */
+.gc-outcome-rows .is-headline{background:var(--gc-positive-bg)}
+.gc-outcome-rows .is-headline dd{font-weight:var(--weight-semibold)}
+.gc-outcome-rows .is-headline dt{color:var(--gc-positive);font-weight:var(--weight-medium)}
+/* A premium is not a loss: mark it with the cost tone but leave the figure
+   legible, since the same row's note explains what it buys. */
+.gc-outcome-rows .is-premium dt{color:var(--gc-muted)}
+/* "Premium recovered — Year 10" is the positive outcome of the two facts. */
+.gc-example-facts .is-recovered dd{color:var(--gc-positive)}
+
+/* ---------- The plain-language verdict: tone must follow the sign ----------
+   The banner is always accent green, so a result that does NOT pay back still
+   read as a win. The banner keeps its green when the design saves and switches
+   to the cost tone when it does not, matching the sentence inside it. */
+.result-outcome.is-cost{border-color:var(--gc-negative);background:var(--gc-negative-bg)}
+.result-outcome.is-cost .eyebrow{color:var(--gc-negative)}
+.result-outcome.is-cost p:not(.eyebrow){color:var(--gc-text)}
+
+/* ---------- Budget range table: a signed column that was unsigned ---------- */
+.budget-table .cell-case{text-transform:capitalize;font-weight:var(--weight-medium)}
+.budget-table .cell-figure{font-variant-numeric:tabular-nums}
+.budget-table .cell-signed{font-weight:var(--weight-semibold)}
+.budget-table .cell-signed.is-saving{color:var(--gc-positive)}
+.budget-table .cell-signed.is-cost{color:var(--gc-negative)}
+.budget-table .cell-signed.is-neutral{color:var(--gc-muted);font-weight:var(--weight-regular)}
+/* The headline result uses the midpoint, so the other two rows are context. */
+.budget-table tbody tr.row-base td{background:color-mix(in srgb, var(--gc-accent) 7%, transparent)}
+.budget-table tbody tr.row-base .cell-case{color:var(--gc-accent)}
+
+/* ---------- Cost breakdown: a recovered-material credit is a gain ----------
+   Every row in the disclosure read the same weight, so a credit returned to
+   the owner looked like another cost. Give it the positive tone. */
+.cost-breakdown div.is-credit b{color:var(--gc-positive)}
+.cost-breakdown div.is-credit span{color:var(--gc-positive)}
+
+/* ---------- Landing chart: name the break-even marker ----------
+   The dashed vertical was unlabelled in the legend, so a reader had to infer
+   what it meant from the flag alone. This key matches the dash pattern. */
+.gc-key--crossover{background:repeating-linear-gradient(to right,var(--forest) 0 3px,transparent 3px 5px);height:2px;opacity:.75}
+
+/* ---------- Quote pair: the difference the user is actually weighing ----------
+   A signed figure is the entire point of entering two quotes, so it gets the
+   tone vocabulary rather than sitting as plain body text. */
+.quote-difference b{font-weight:var(--weight-semibold);font-variant-numeric:tabular-nums}
+.quote-difference b.is-saving{color:var(--gc-positive)}
+.quote-difference b.is-cost{color:var(--gc-negative)}
+.quote-difference b.is-neutral{color:var(--gc-muted);font-weight:var(--weight-regular)}
+
 /* ---------- Evidence toggles: one height for all three ----------
    "View numerical evidence" wraps to two lines in some cards and one in
    others, so the boxes mismatch. Pin every summary to two text lines plus
