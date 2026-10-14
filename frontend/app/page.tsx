@@ -183,7 +183,7 @@ export default function Home(){
                 </div>
                 <div className="is-save">
                   <dt>Net saving over the period</dt>
-                  <dd>{SAMPLE.saving} <small>({SAMPLE.savingShare} of conventional whole-life cost)</small></dd>
+                  <dd>{SAMPLE.saving} <small>({SAMPLE.savingShare} of the conventional total)</small></dd>
                 </div>
                 <div>
                   <dt>Additional cost on day one</dt>
