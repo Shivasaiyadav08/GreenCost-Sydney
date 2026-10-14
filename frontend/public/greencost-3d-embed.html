@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GreenCost live model</title>
+<style>
+:root{--bg:#f4f2ec;--card:#fff;--ink:#14201b;--mute:#5d6b64;--line:#dfe3dd;--g:#1f6b4a;box-sizing:border-box}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1512;--card:#17211c;--ink:#e9efe9;--mute:#9aa9a1;--line:#27342d;--g:#4fb386}}
+:root[data-theme="dark"]{--bg:#0e1512;--card:#17211c;--ink:#e9efe9;--mute:#9aa9a1;--line:#27342d;--g:#4fb386}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--card);color:var(--ink);
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+/* The embed fills the iframe exactly: type bar on top, stage takes the
+   remaining space, control bar at the bottom. */
+.card{width:100%;height:100%;display:flex;flex-direction:column}
+.stage{position:relative;flex:1;min-height:0;cursor:grab;touch-action:none;overflow:hidden;transition:background .6s}
+.stage.day{background:linear-gradient(180deg,#bfe0ee 0%,#e6f0ea 58%,#dfe9d9 100%)}
+.stage.night{background:linear-gradient(180deg,#09111f 0%,#16243a 60%,#1b2b35 100%)}
+.stage:active{cursor:grabbing}
+.stage.day.rain{background:linear-gradient(180deg,#9db0bd 0%,#c8d2d3 58%,#c1ccc1 100%)}
+.stage.night.rain{background:linear-gradient(180deg,#0a111c 0%,#1a2533 60%,#1d2a30 100%)}
+.stage:focus-visible{outline:2px solid var(--g);outline-offset:-2px}
+canvas{display:block;width:100%;height:100%}
+@keyframes ping{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--g) 45%,transparent)}70%,100%{box-shadow:0 0 0 9px transparent}}
+@media (prefers-reduced-motion:no-preference){.pin i{animation:ping 2.4s ease-out infinite}}
+.pin{position:absolute;transform:translate(-50%,-120%);pointer-events:none;background:var(--card);color:var(--ink);
+  border:1px solid var(--line);border-radius:999px;padding:6px 12px 6px 9px;font-size:12px;display:flex;gap:7px;
+  align-items:center;box-shadow:0 4px 14px rgba(0,0,0,.14);white-space:nowrap;transition:opacity .25s}
+.pin i{width:8px;height:8px;border-radius:50%;background:var(--g);display:block;box-shadow:0 0 0 4px color-mix(in srgb,var(--g) 25%,transparent)}
+.pin small{color:var(--mute);font-size:11px}
+.hint{position:absolute;right:12px;bottom:10px;font-size:11px;color:#fff;background:rgba(0,0,0,.35);
+  padding:4px 10px;border-radius:999px;pointer-events:none}
+.bar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;padding:10px 14px;border-top:1px solid var(--line)}
+.grp{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mute)}
+button{font:inherit;font-size:13px;color:var(--ink);background:transparent;border:1px solid var(--line);
+  border-radius:999px;padding:7px 14px;cursor:pointer;min-height:36px}
+button:hover{border-color:var(--g)}
+button:focus-visible{outline:2px solid var(--g);outline-offset:2px}
+button[aria-pressed="true"]{background:var(--g);color:#fff;border-color:var(--g)}
+.step{width:36px;padding:0;font-size:16px}
+.val{min-width:14px;text-align:center;color:var(--ink);font-weight:600}
+.seg-bar{border-top:0;border-bottom:1px solid var(--line)}
+.seg{display:flex;gap:8px;width:100%}
+.seg button{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:14px;padding:10px 12px}
+.seg svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.seg button[aria-pressed="true"]{background:color-mix(in srgb,var(--g) 14%,var(--card));color:var(--g);border-color:var(--g)}
+@media (max-width:520px){.pin small{display:none}.seg button span{font-size:12px}.seg svg{display:none}}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="bar seg-bar"><div class="seg" role="group" aria-label="Building type">
+      <button data-t="house" aria-pressed="true"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-6h4v6"/></svg><span>House</span></button>
+      <button data-t="apartment" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M6 21V4h12v17"/><path d="M3 21h18M10 8h4M10 12h4M10 16h4"/></svg><span>Apartment</span></button>
+      <button data-t="commercial" aria-pressed="false"><svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 14h18"/></svg><span>Commercial</span></button>
+    </div></div>
+
+    <div class="stage day" id="stage" tabindex="0" role="img"
+      aria-label="Interactive 3D model of a Sydney courtyard house with timber upper floor, rooftop solar and rainwater tank">
+      <div class="pin" id="p-solar"><i></i>Rooftop solar <small>sun-facing slope</small></div>
+      <div class="pin" id="p-ins"><i></i>Insulated shell <small>roof, walls, windows</small></div>
+      <div class="pin" id="p-tank"><i></i>Rainwater tank <small>side garden</small></div>
+      <div class="hint">Drag to explore</div>
+    </div>
+
+    <div class="bar">
+      <div class="grp">Storeys
+        <button class="step" id="sm" aria-label="Fewer storeys">&minus;</button>
+        <span class="val" id="sv">2</span>
+        <button class="step" id="sp" aria-label="More storeys">+</button>
+      </div>
+      <button id="solar" aria-pressed="true">Solar</button>
+      <button id="night" aria-pressed="false">Night</button>
+      <button id="rain" aria-pressed="false">Rain</button>
+      <button id="spin" aria-pressed="true">Auto-rotate</button>
+      <button id="labels" aria-pressed="true">Labels</button>
+    </div>
+
+    <!-- The scene script updates this label when the building type changes. -->
+    <b id="bname" hidden>Sydney courtyard house.</b>
+  </div>
+
+<!-- three.js is served from this origin: the app's Content-Security-Policy sets
+     script-src 'self', so a CDN build would be blocked in production. -->
+<script src="/three.r128.min.js"></script>
+<script src="/greencost-scene3d.js"></script>
+</body>
+</html>
