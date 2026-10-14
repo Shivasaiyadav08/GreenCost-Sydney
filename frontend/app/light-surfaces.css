@@ -109,6 +109,7 @@
 
 /* Mobile comparison controls: clear buttons and separate step cards. */
 @media (max-width: 760px) {
+  .project-card .form-stepper { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .project-card .form-topline {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -157,7 +158,7 @@
 
   .project-card .form-stepper {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 8px;
     margin: 16px 14px 0;
     padding: 0 !important;

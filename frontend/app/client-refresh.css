@@ -41,6 +41,16 @@ h4,h5,.comparison-review h4{font-family:Inter,Arial,sans-serif!important;letter-
 
 .workflow-finished .guide-steps,.workflow-finished .agent-intro{display:none}.workflow-finished .stage-timeline{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px}.workflow-finished .stage-timeline b{font-size:11px}.workflow-finished .stage-timeline li{gap:6px}
 
+/* A quiet placeholder keeps the hero layout steady while the 3D module loads. */
+.gc-stage-skeleton{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden;background:linear-gradient(180deg,#eaf0ec,#f8faf8)}
+.gc-stage-skeleton:before{content:"";position:absolute;left:18%;right:18%;bottom:13%;height:15%;border-radius:50%;background:#e0e7e1}
+.gc-stage-skeleton span{position:absolute;display:block;border-radius:5px;background:linear-gradient(100deg,#dce5df 20%,#edf2ee 42%,#dce5df 64%);background-size:220% 100%;animation:gc-skeleton 1.6s ease-in-out infinite}
+.gc-stage-skeleton span:nth-child(1){width:42%;height:30%;bottom:28%;left:29%}
+.gc-stage-skeleton span:nth-child(2){width:48%;height:5%;bottom:58%;left:26%;transform:skewY(-8deg)}
+.gc-stage-skeleton span:nth-child(3){width:5%;height:10%;bottom:17%;left:23%;border-radius:50%}
+@keyframes gc-skeleton{to{background-position-x:-220%}}
+@media(prefers-reduced-motion:reduce){.gc-stage-skeleton span{animation:none;background:#e1e8e2}}
+
 /* The building and its street share the first screen with the introduction. */
 .landing-hero .hero-tag{font-size:9px;letter-spacing:.8px;margin-bottom:0}
 .landing-hero .world-panel{overflow:hidden}

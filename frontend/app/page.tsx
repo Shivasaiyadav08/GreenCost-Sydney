@@ -1,18 +1,13 @@
 'use client';
-import {useEffect, useState} from 'react';
+import {useEffect} from 'react';
 import {useRouter} from 'next/navigation';
-import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import {
-  ArrowRight, ArrowUpRight, BookOpen, Check, Globe2, Layers3, Leaf, Minus, Plus, Sun,
+  ArrowRight, ArrowUpRight, BookOpen, Check, Globe2, Layers3, Leaf,
 } from 'lucide-react';
 import SiteHeader from '@/components/SiteHeader';
+import LandingScene from '@/components/LandingScene';
 import PaybackChart from '@/components/PaybackChart';
-
-const WorldScene = dynamic(()=>import('@/components/WorldScene'), {
-  ssr: false,
-  loading: () => <div className="gc-stage-fallback">Preparing your building…</div>,
-});
 
 const STEPS = [
   {
@@ -30,7 +25,7 @@ const STEPS = [
 ];
 
 const STRIP = [
-  {icon: BookOpen,   title: 'A research library',        body: 'Rate inputs traceable to published sources, not invented figures.'},
+  {icon: BookOpen,   title: 'A research library',        body: 'Sydney reference rates with sources. Other estimates are clearly labelled.'},
   {icon: Globe2,     title: 'NSW context built in',       body: 'Ausgrid tariffs, Sydney water pricing and local construction rates.'},
   {icon: Leaf,       title: 'Assumptions you can open',   body: 'Every discount rate, escalation and service life is visible and editable.'},
 ];
@@ -40,17 +35,16 @@ const STRIP = [
 const SAMPLE = {
   building: 'Sydney courtyard house',
   detail: '250 m² · 2 storeys · Ausgrid · 5% discount',
-  conventional: '$961,153',
-  sustainable: '$936,347',
-  saving: '$24,805',
-  premium: '$12,981',
+  conventional: 'A$961,153',
+  sustainable: 'A$936,347',
+  saving: 'A$24,805',
+  premium: 'A$12,981',
   payback: 'Year 10',
+  savingShare: `${(24_805 / 961_153 * 100).toFixed(1)}%`,
 };
 
 export default function Home(){
   const router = useRouter();
-  const [floors, setFloors] = useState(2);
-  const [solar, setSolar] = useState(true);
 
   useEffect(()=>{
     if(new URLSearchParams(window.location.search).has('project')){
@@ -88,65 +82,23 @@ export default function Home(){
               <button className="gc-btn gc-btn-primary" onClick={()=>router.push('/compare')}>
                 Start comparison <ArrowUpRight size={16}/>
               </button>
-              <button className="gc-btn gc-btn-quiet" onClick={()=>router.push('/compare?sample=1')}>
+              <button className="gc-btn gc-btn-secondary" onClick={()=>router.push('/compare?sample=1')}>
                 Explore a sample <ArrowRight size={15}/>
               </button>
             </div>
 
             <div className="gc-trust">
-              <span><Check size={14}/> Every figure traceable to a source</span>
+              <span><Check size={14}/> Sydney reference rates with sources</span>
               <span><Check size={14}/> Discount rate and escalation editable</span>
             </div>
           </div>
 
-          {/* ---- Building panel ---- */}
           <div className="gc-panel">
             <div className="gc-panel-head">
               <span>Your building</span>
               <span className="gc-panel-tag"><i/>Live model</span>
             </div>
-
-            <div className="gc-stage">
-              <WorldScene floors={floors} solar={solar} busy={false}/>
-
-              <div className="gc-note gc-note--research">
-                <span className="gc-note-icon"><BookOpen size={15}/></span>
-                <div>
-                  <b>Research meets reality</b>
-                  <small>Reference rates + research</small>
-                </div>
-              </div>
-
-              <div className="gc-note gc-note--future">
-                <span className="gc-note-icon gc-note-icon--warm"><Leaf size={15}/></span>
-                <div>
-                  <b>Every year matters</b>
-                  <small>30, 40 &amp; 50-year comparisons</small>
-                </div>
-              </div>
-            </div>
-
-            <p className="gc-stage-caption">
-              Change storeys or solar and the comparison recalculates around
-              Sydney reference rates.
-            </p>
-
-            <div className="gc-panel-foot">
-              <div className="gc-stepper">
-                <span className="gc-stepper-label">Storeys</span>
-                <button aria-label="Remove a storey" disabled={floors===1}
-                  onClick={()=>setFloors(f=>Math.max(1,f-1))}><Minus size={13}/></button>
-                <output aria-live="polite">{floors}</output>
-                <button aria-label="Add a storey" disabled={floors===4}
-                  onClick={()=>setFloors(f=>Math.min(4,f+1))}><Plus size={13}/></button>
-              </div>
-
-              <button className="gc-toggle" aria-pressed={solar} onClick={()=>setSolar(s=>!s)}>
-                <Sun size={14}/> Solar <span className="gc-toggle-track"/>
-              </button>
-
-              <span className="gc-hint">Drag to explore</span>
-            </div>
+            <LandingScene/>
           </div>
         </section>
 
@@ -231,7 +183,7 @@ export default function Home(){
                 </div>
                 <div className="is-save">
                   <dt>Net saving over the period</dt>
-                  <dd>{SAMPLE.saving}</dd>
+                  <dd>{SAMPLE.saving} <small>({SAMPLE.savingShare} of conventional whole-life cost)</small></dd>
                 </div>
                 <div>
                   <dt>Additional cost on day one</dt>
@@ -245,6 +197,21 @@ export default function Home(){
                 calculator and the comparison updates.
               </p>
             </div>
+          </div>
+        </section>
+
+        <section className="gc-shell gc-section gc-faq" aria-labelledby="faq-title">
+          <div className="gc-faq-heading">
+            <span className="gc-eyebrow">COMMON QUESTIONS</span>
+            <h2 id="faq-title">Before you compare.</h2>
+            <p>What the Sydney estimate can show, and where a builder or assessor is still needed.</p>
+          </div>
+          <div className="gc-faq-list">
+            <details><summary>What does the discount rate mean?</summary><p>It converts future costs into today’s equivalent dollars. The comparison lets you adjust it because there is no single rate that suits every project.</p></details>
+            <details><summary>Is break-even the same as the lowest whole-life cost?</summary><p>No. Break-even is the first year discounted cumulative costs cross. Whole-life cost is the total at your chosen study-period end, so the advantage can later narrow or reverse.</p></details>
+            <details><summary>Are rebates included?</summary><p>No rebates are assumed automatically. Add a confirmed incentive only when it applies to your project, and check whether your quotes already include it.</p></details>
+            <details><summary>Is this a BASIX or NatHERS assessment?</summary><p>No. GreenCost is an indicative cost-planning comparison. It does not assess compliance or replace a qualified assessor, certifier or builder.</p></details>
+            <details><summary>What does “sustainable” mean here?</summary><p>It means the features and performance assumptions you select for this comparison. The tool reports the modelled cost effects; it does not claim a complete environmental or carbon assessment.</p></details>
           </div>
         </section>
 
@@ -287,6 +254,7 @@ export default function Home(){
             <span className="gc-brand-word">greencost</span>
           </Link>
           <Link href="/methodology">Method &amp; evidence</Link>
+          <Link href="/methodology#privacy">Privacy</Link>
           <Link href="/compare">Calculator</Link>
           <small>Indicative planning tool · Costs in AUD</small>
         </div>

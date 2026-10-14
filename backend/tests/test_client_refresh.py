@@ -41,11 +41,11 @@ def test_apartment_unit_cannot_take_whole_building_shared_upgrades():
 def test_water_units_and_maintenance_labels_in_export_are_consistent():
     result = client.post('/api/analyse', json=sample(water_kl=500, selected_measures=[])).json()
     water = next(a for a in result['assumptions'] if a['name'] == 'Annual water')
-    assert water['value'] == 500000 and water['unit'] == 'L/year'
-    million = next(a for a in result['assumptions'] if a['name'] == 'Annual water in million litres')
-    assert million['value'] == .5
+    assert water['value'] == .5 and water['unit'] == 'million litres/year'
+    assert not any(a['unit'] == 'L/year' for a in result['assumptions'])
     text = '\n'.join(p.extract_text() for p in PdfReader(io.BytesIO(pdf_report(result, 40))).pages)
-    assert '500,000 L (0.5 million litres)' in text
+    assert '0.5 million litres/year' in text
+    assert 'Indicative planning tool. Not a quotation, financial advice, or a NatHERS/BASIX assessment.' in text
     assert 'Initial building cost' in text
     assert 'Routine maintenance over 40 years' in text
 

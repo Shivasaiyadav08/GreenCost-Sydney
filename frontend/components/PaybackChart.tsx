@@ -1,5 +1,7 @@
 'use client';
 
+import {formatAUD,formatCompactAUD} from '@/lib/format';
+
 /**
  * Cumulative cost of a conventional and a sustainable specification over the
  * study period, with the crossover marked.
@@ -81,13 +83,14 @@ export default function PaybackChart() {
       <figcaption className="gc-chart-head">
         <span className="gc-chart-title">Cumulative cost over time</span>
         <span className="gc-chart-sub">Sydney courtyard house · 40-year study</span>
+        <span className="gc-chart-sub">AUD · vertical axis starts at A$700,000, not zero</span>
       </figcaption>
 
       <svg
         className="gc-chart-svg"
         viewBox="0 0 440 232"
         role="img"
-        aria-label="Line chart of cumulative cost. The sustainable specification starts 12,981 dollars higher, crosses below the conventional specification in year 10, and finishes 24,806 dollars lower over 40 years."
+        aria-label={`Line chart of cumulative cost in Australian dollars. The sustainable specification starts ${formatAUD(12_981)} higher, crosses below the conventional specification in year 10, and finishes ${formatAUD(24_805)} lower over 40 years. The vertical axis starts at ${formatAUD(COST_MIN)}, not zero.`}
       >
         {/* gridlines */}
         {[800_000, 900_000, 1_000_000].map(cost => (
@@ -98,7 +101,7 @@ export default function PaybackChart() {
               y1={y(cost)} y2={y(cost)}
             />
             <text className="gc-chart-axis" x={PLOT.left - 8} y={y(cost) + 3} textAnchor="end">
-              {cost === 1_000_000 ? '$1.0m' : `$${cost / 1000}k`}
+              {formatCompactAUD(cost)}
             </text>
           </g>
         ))}
@@ -143,7 +146,7 @@ export default function PaybackChart() {
         {/* End-of-study difference, set below the curves where nothing else
             sits rather than across the sustainable line. */}
         <text className="gc-chart-endpoint" x={PLOT.right} y={PLOT.bottom - 12} textAnchor="end">
-          $24,805 lower by year 40
+          {formatAUD(24_805)} lower by year 40
         </text>
       </svg>
 

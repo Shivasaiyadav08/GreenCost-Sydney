@@ -25,7 +25,8 @@ export type Stage = {type:'stage_start'|'stage'|'result'|'error';providers?:{gem
 export type Measure={id:string;name:string;plain_description:string;guidance_url?:string;guidance_checked?:string};
 export type MeasureCost={id:string;name:string;premium:number;quantity:number;quantity_driver:string;unit_price:number;low:number;high:number;badge:string;source:string;price_date:string};
 export type ExtendedAnalysis={budget_scenarios?:Record<string,Record<string,{conventional:number;sustainable:number;savings_aud:number}>>;measures?:MeasureCost[];measure_contributions?:Record<string,{id:string;name:string;marginal_savings:number;standalone_savings:number;interaction_adjustment:number}[]>;literature_scenarios?:Record<string,Record<string,Period>>;price_sensitivity?:Record<string,Record<string,{savings_aud:number;break_even_year:number|null}>>;assumption_version?:string;price_snapshot_date?:string};
-export const money = (v:number) => new Intl.NumberFormat('en-AU',{style:'currency',currency:'AUD',maximumFractionDigits:0}).format(v);
+import {formatAUD} from './format';
+export const money = formatAUD;
 export class ApiError extends Error {constructor(message:string,public fields:Record<string,string>={},public status=0,public details?:Record<string,unknown>){super(message);this.name='ApiError';}}
 async function readResponse(response:Response){
  let result;try{result=await response.json();}catch{throw new ApiError('The calculator could not be reached. Check the connection and retry.');}

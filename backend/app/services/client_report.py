@@ -1,5 +1,6 @@
 """Client-facing report content derived exclusively from calculated financial facts."""
 from backend.app.services.explanation import money
+from backend.app.services.formatting import format_australian_date, format_number, format_water_volume
 
 LABELS = {"capital": "Initial building cost", "energy": "Electricity and gas", "water": "Water and service charges", "maintenance": "Routine maintenance", "replacement": "Equipment replacements", "other": "Other running costs", "disposal": "End-of-period removal", "residual": "Recovered-material credit"}
 
@@ -30,14 +31,15 @@ def report_content(result, years):
     maint = r["component_savings"].get("maintenance", 0)
     findings.append("Routine maintenance costs are the same in both designs. No maintenance saving is assumed for this selection; equipment replacements are counted separately." if abs(maint) < .005 else f"Routine maintenance is modelled at {money(abs(maint))} {'less' if maint > 0 else 'more'} for the sustainable design over the study.")
     area = p["area"] * (.092903 if p["area_unit"] == "ft²" else 1)
-    water = f"{p['water_kl'] * 1000:,.0f} L ({p['water_kl'] / 1000:g} million litres)"
-    inputs = [["Building scope", p["building_type"] + " | postcode " + p["postcode"]], ["Total floor area", f"{area:,.1f} m2"], ["Number of floors", str(p["floors"])], ["Number of occupants", str(p["occupants"]) + (" (planning estimate)" if p.get("occupant_mode") == "estimate" else " (entered count)")], ["Annual grid electricity", f"{p['energy_kwh']:,.0f} kWh"], ["Annual water", water], ["Discount rate", f"{p['discount']:.1%} - future costs are converted to today's equivalent"], ["Annual electricity price growth", f"{p['energy_escalation']:.1%}"], ["Annual water / maintenance price growth", f"{p['water_escalation']:.1%} / {p['maintenance_escalation']:.1%}"], ["Price reference date", str(result.get("price_snapshot_date") or p["price_date"])]]
+    water = format_water_volume(p["water_kl"] * 1000)
+    inputs = [["Building scope", p["building_type"] + " | postcode " + p["postcode"]], ["Total floor area", f"{format_number(area)} m2"], ["Number of floors", str(p["floors"])], ["Number of occupants", str(p["occupants"]) + (" (planning estimate)" if p.get("occupant_mode") == "estimate" else " (entered count)")], ["Annual grid electricity", f"{p['energy_kwh']:,.0f} kWh"], ["Annual water", water], ["Discount rate", f"{p['discount']:.1%} - future costs are converted to today's equivalent"], ["Annual electricity price growth", f"{p['energy_escalation']:.1%}"], ["Annual water / maintenance price growth", f"{p['water_escalation']:.1%} / {p['maintenance_escalation']:.1%}"], ["Price reference date", format_australian_date(result.get("price_snapshot_date") or p["price_date"])]]
     if p.get("building_type") == "Apartment Building":
-        inputs.insert(2, ["Entered area per floor" if p.get("area_basis") == "per_floor" else "Entered combined building area", f"{p.get('entered_area') or p['area']:,.1f} {p['area_unit']}"])
+        inputs.insert(2, ["Entered area per floor" if p.get("area_basis") == "per_floor" else "Entered combined building area", f"{format_number(p.get('entered_area') or p['area'])} {p['area_unit']}"])
     cells = [v["savings_aud"] for v in result.get("sensitivity", []) if v["years"] == years]
     robustness = (f"Across the tested discount rates and electricity-price growth assumptions, sustainable total cost ranges from {money(abs(min(cells)))} {'less' if min(cells)>=0 else 'more'} to {money(abs(max(cells)))} {'less' if max(cells)>=0 else 'more'}. " + ("The sustainable design remains cheaper in all tested cases." if min(cells)>0 else "The sustainable design remains more expensive in all tested cases." if max(cells)<0 else "The preferred design changes in some tested cases; the conclusion depends on the assumptions.")) if cells else "Sensitivity results were not captured."
     next_steps = ["Ask your builder for conventional and upgraded installed quotes covering the same scope, including labour, GST and applicable rebates.", "Replace practice consumption with measured annual bills or a documented building design estimate. Check fixed charges across all included meters.", "Confirm upgrade performance, equipment life and replacement costs. Review roof suitability and the actual rainwater demand before purchase.", "Review the discount rate, price growth and end-of-period plan. Use the cash-flow CSV and saved project file for the full technical record."]
     warning = "EXAMPLE PROJECT: costs and usage are practice values. Replace them before presenting this as a project estimate." if p.get("input_quality") == "demo" else "Planning estimate: accuracy depends on the entered costs, usage and upgrade performance. Confirm project quotes before committing."
+    warning += " Indicative planning tool. Not a quotation, financial advice, or a NatHERS/BASIX assessment."
     from backend.app.services.catalogue import catalogue
     descriptions = {m["id"]:m.get("plain_description", "") for m in catalogue()}
     upgrades = []
@@ -50,7 +52,7 @@ def report_content(result, years):
         upgrades.append({**m, "description":description})
     name = p.get("name") or "Your project"
     scope = {"Residential House": "house", "Apartment Building": "apartment building", "Apartment": "apartment", "Commercial / Other": "commercial or other building"}.get(p["building_type"], p["building_type"].lower())
-    narrative = [f"{name} is a {scope} in postcode {p['postcode']}, with a total floor area of {area:,.1f} m2. This report compares the conventional and sustainable designs for the same building over {years} years."]
+    narrative = [f"{name} is a {scope} in postcode {p['postcode']}, with a total floor area of {format_number(area)} m2. This report compares the conventional and sustainable designs for the same building over {years} years."]
     if upgrades:
         details = "; ".join(m["name"] + ": " + m["description"].rstrip(".") for m in upgrades[:4]) + "."
         if len(upgrades) > 4:

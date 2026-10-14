@@ -8,6 +8,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, KeepTogether
 from backend.app.services.explanation import money
 from backend.app.services.client_report import report_content, LABELS
+from backend.app.services.formatting import format_number
 
 
 def pdf_report(result, years):
@@ -127,11 +128,9 @@ def pdf_report(result, years):
     for text in view["findings"]:
         add(text)
     add(
-        f"Scope: {p['building_type']} | Postcode {p['postcode']} | {p['area'] * (0.092903 if p['area_unit'] == 'ft²' else 1):,.1f} m2 total floor area | {p['floors']} floor(s).",
+        f"Scope: {p['building_type']} | Postcode {p['postcode']} | {format_number(p['area'] * (0.092903 if p['area_unit'] == 'ft²' else 1))} m2 total floor area | {p['floors']} floor(s).",
         "SmallText",
     )
-    add("Annual water: " + f"{p['water_kl'] * 1000:,.0f} L ({p['water_kl'] / 1000:g} million litres).", "SmallText")
-
     page("Why the costs differ", "Explain the result before reviewing the assumptions.")
     heading("Your project explained")
     for text in view["project_explanation"]:

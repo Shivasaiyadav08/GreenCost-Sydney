@@ -2,6 +2,7 @@
 
 import {useSyncExternalStore} from 'react';
 import {THEME_KEY} from './theme-initialization';
+import {formatCompactAUD} from './format';
 
 export type Theme = 'light' | 'dark';
 const THEME_EVENT = 'greencost-theme-change';
@@ -50,4 +51,4 @@ export const chartPalette = {
  dark: {sustainable:'#98c56e', conventional:'#e5a16c', grid:'#30382e', text:'#a5ada1', surface:'#151815', foreground:'#f7f7f2', components:['#98c56e','#e5a16c','#72996b','#ced68d','#78b2b8','#baa17b','#a0a59b','#d69ca5']},
 };
 
-export const compactMoney = (value: number) => new Intl.NumberFormat('en-AU', {style:'currency', currency:'AUD', notation:'compact', maximumFractionDigits:1}).format(value);
+export const compactMoney = formatCompactAUD;
