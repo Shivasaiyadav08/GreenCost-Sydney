@@ -208,6 +208,16 @@
    what it meant from the flag alone. This key matches the dash pattern. */
 .gc-key--crossover{background:repeating-linear-gradient(to right,var(--forest) 0 3px,transparent 3px 5px);height:2px;opacity:.75}
 
+/* ---------- Ask-about-this-analysis presets ----------
+   These pills were once pinned to #f4f8ee, a light-only fill with no dark
+   counterpart, so on a first paint that landed dark before data-theme settled
+   they rendered pale under light text. The source rule now uses tokens; this
+   last-loaded layer repeats it as defence in depth so no earlier layer can
+   reintroduce a fixed light fill. */
+.question-presets button{background:var(--gc-raised);border:1px solid var(--gc-line);color:var(--gc-text)}
+.question-presets button:hover:not(:disabled){background:var(--gc-accent-soft);border-color:var(--gc-accent);color:var(--gc-accent)}
+.ask-section{background:var(--gc-surface);border-color:var(--gc-line)}
+
 /* ---------- Quote pair: the difference the user is actually weighing ----------
    A signed figure is the entire point of entering two quotes, so it gets the
    tone vocabulary rather than sitting as plain body text. */

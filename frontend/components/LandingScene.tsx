@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect, useState} from 'react';
+import {useCallback, useEffect, useRef} from 'react';
 
 // The live model is a self-contained document (see
 // public/greencost-3d-embed.html) so the three.js scene keeps its own orbit,
@@ -8,32 +8,41 @@ import {useEffect, useState} from 'react';
 // animation loop from the landing page, and the embedded page shows only the
 // interactive stage so it fits the panel without a second set of controls.
 //
-// A separate document cannot read the parent's data-theme attribute, so the
-// theme is passed on the query string and the src is rebuilt when the reader
-// toggles. The initial value is read from the DOM rather than from React state:
-// on first paint the page's own bootstrap may already have resolved a saved or
-// system preference, and reading state instead left the panel in the opposite
-// palette to the page around it until the reader toggled twice.
-function currentTheme(){
+// The theme reaches the embedded document by postMessage rather than on the
+// query string. Binding it to `src` rebuilt the URL on every toggle, and
+// changing src tears the document down and reloads it, so the model vanished
+// and rebuilt itself each time the reader switched theme. The src is now fixed
+// for the lifetime of the page; the scene is told to restyle instead. The
+// initial value rides on the query string so the first paint is already
+// correct with no flash.
+function currentTheme(): 'light' | 'dark' {
   return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
 }
 
+const INITIAL_SRC = '/greencost-3d-embed.html?theme=' +
+  (typeof document !== 'undefined' && document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light');
+
 export default function LandingScene(){
-  const [theme, setTheme] = useState<'light' | 'dark' | null>(null);
+  const frame = useRef<HTMLIFrameElement>(null);
+
+  const sync = useCallback(() => {
+    frame.current?.contentWindow?.postMessage({type: 'greencost-theme', theme: currentTheme()}, '*');
+  }, []);
 
   useEffect(() => {
-    const sync = () => setTheme(currentTheme());
     sync();
     window.addEventListener('greencost-theme-change', sync);
     return () => window.removeEventListener('greencost-theme-change', sync);
-  }, []);
+  }, [sync]);
 
   return <iframe
+    ref={frame}
     className="gc-scene-embed"
-    // Before the theme is known, the document follows the system preference
-    // (its own default), which is the same thing the page bootstrap would pick.
-    src={theme ? `/greencost-3d-embed.html?theme=${theme}` : '/greencost-3d-embed.html'}
+    src={INITIAL_SRC}
     title="Interactive 3D model of a Sydney courtyard house"
     loading="lazy"
+    // A toggle that lands while the frame is still loading would otherwise be
+    // lost, so the theme is sent again once the document is ready.
+    onLoad={sync}
   />;
 }

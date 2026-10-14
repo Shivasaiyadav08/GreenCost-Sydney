@@ -7,12 +7,22 @@
 <script>
 // The parent page passes its resolved theme so this document matches it
 // exactly, including an explicit override of the operating-system preference.
-// Runs in head, before paint, so there is no flash of the wrong palette.
+// The query string covers the first paint (no flash). Later changes arrive as a
+// message, because rebuilding the src would reload this document and restart
+// the three.js scene - which made the model blink out on every theme toggle.
 (function(){
+  function apply(t){
+    if(t!=='dark'&&t!=='light') return;
+    document.documentElement.dataset.theme=t;
+    document.documentElement.style.colorScheme=t;
+  }
   try{
-    var t=new URLSearchParams(location.search).get('theme');
-    if(t==='dark'||t==='light'){document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t;}
+    apply(new URLSearchParams(location.search).get('theme'));
   }catch(e){}
+  window.addEventListener('message', function(event){
+    var data=event.data;
+    if(data && data.type==='greencost-theme') apply(data.theme);
+  });
 })();
 </script>
 <style>
