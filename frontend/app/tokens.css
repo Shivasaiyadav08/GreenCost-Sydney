@@ -216,6 +216,8 @@
   --gc-error-line: color-mix(in srgb, var(--critical) 30%, var(--surface));
   --gc-negative: var(--critical);
   --gc-negative-bg: color-mix(in srgb, var(--critical) 14%, var(--surface));
+  --gc-positive: var(--positive);
+  --gc-positive-bg: color-mix(in srgb, var(--positive) 14%, var(--surface));
   --gc-shadow: var(--shadow-raise);
 
   /* component-refresh.css scale */
