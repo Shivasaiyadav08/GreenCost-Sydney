@@ -41,6 +41,14 @@
 .landing-hero{overflow:clip}.chart-large,.chart-small{overflow:clip}
 .results-toolbar{flex-wrap:wrap;gap:14px}.results-toolbar>span{min-width:0}
 .export-actions{max-width:100%}.table-scroll{max-width:100%;min-width:0}
+/* Share link panel: the link is long, so show it in full instead of a brief toast. */
+.share-panel{background:#fff;border:1px solid #d6decd;border-radius:14px;padding:18px;margin:14px 0;max-width:760px}
+.share-panel-title{font-weight:600;font-size:13px;color:#31533f;margin-bottom:12px}
+.share-panel-row{display:flex;gap:8px;align-items:stretch}
+.share-panel-row input{flex:1;min-width:0;font-family:Inter,Arial,sans-serif;font-size:12px;border:1px solid #d9e1d7;border-radius:10px;background:#f7f9f4;color:#24392b;padding:12px 14px;min-height:48px}
+.share-panel-note{font-size:12px;color:#5e6e59;margin:12px 0}
+.share-panel .button{margin-top:2px}
+@media(max-width:650px){.share-panel{padding:14px}.share-panel-row{flex-wrap:wrap}.share-panel-row .button{width:100%}}
 .comparison-intro>p{max-width:100%}.supplier-results a,.small-note{overflow-wrap:anywhere}
 @media(max-width:650px){.hero-spark{right:0!important;font-size:28px!important}.device-tools{justify-content:flex-start}.export-actions .button{font-size:11px;padding:10px 12px}.results-toolbar{align-items:flex-start}.comparison-intro>p br{display:block}.literature-grid article{min-width:0}}
 
