@@ -37,7 +37,7 @@ export function nativeErrors(form:HTMLFormElement){
  for(const element of Array.from(form.elements)){
   if(!(element instanceof HTMLInputElement||element instanceof HTMLSelectElement||element instanceof HTMLTextAreaElement)||element.disabled||!element.dataset.fieldKey||element.validity.valid)continue;
   const label=element.dataset.fieldLabel??'this value';
-  errors[element.dataset.fieldKey]=element.validity.valueMissing?'Please enter '+label.toLowerCase()+'.':element.validity.rangeUnderflow?'Use a value of at least '+(element as HTMLInputElement).min+'.':element.validity.rangeOverflow?'Use a value no higher than '+(element as HTMLInputElement).max+'.':element.validity.stepMismatch?'Enter a whole number.':element.validity.patternMismatch?'Enter a valid four-digit Sydney postcode.':'Check this value.';
+  errors[element.dataset.fieldKey]=element.validity.valueMissing?'Please enter '+(label.charAt(0).toLowerCase()+label.slice(1))+'.':element.validity.rangeUnderflow?'Use a value of at least '+(element as HTMLInputElement).min+'.':element.validity.rangeOverflow?'Use a value no higher than '+(element as HTMLInputElement).max+'.':element.validity.stepMismatch?'Enter a whole number.':element.validity.patternMismatch?'Enter a valid four-digit Sydney postcode.':'Check this value.';
  }
  return errors;
 }

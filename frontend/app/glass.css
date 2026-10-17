@@ -1,0 +1,921 @@
+/* ==========================================================================
+   GreenCost — glass layer
+   The final surface pass: a macOS-flavoured frosted-material system.
+
+   Loaded LAST (after light-surfaces.css), so it is the surface authority for
+   both themes. Two mechanisms keep it in front, and both are deliberate:
+
+   1. Every selector carries a `:root[data-theme]` prefix. That lands on the
+      same specificity as the `:root:not([data-theme="dark"])` and
+      `:root[data-theme="dark"]` prefixes the layers below use, so this file
+      wins on source order alone — no escalating specificity war.
+   2. The material declarations are marked `!important`, because the layers it
+      supersedes marked theirs `!important` too (light-surfaces.css pinned
+      every card to `background-color:#fff !important`, and the field rule in
+      ui-layer.css pins `background` and `box-shadow`). An important
+      declaration beats a normal one whatever the specificity, so without the
+      flag those wins would stand.
+
+   Only appearance is marked important — never layout. Spacing, grid and
+   typography are left normal so later work can still adjust them.
+
+   Rules of this layer
+   1. Colour comes from the --wall-* / --glass-* tokens. No raw hex in a
+      component rule.
+   2. Glass is a material, not a decoration. Only real surfaces (windows,
+      panels, cards, bars, wells) get a fill and a blur. Small rows and chips
+      get translucency only — nested blur turns to mud.
+   3. Contrast first. The veil keeps the wallpaper pale in light and deep in
+      dark, so ink stays legible on every panel without a per-component
+      override.
+   4. Blur is expensive. Large surfaces take the heavy blur, and the whole
+      layer degrades to opaque surfaces under prefers-reduced-transparency or
+      a browser without backdrop-filter.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Materials
+   -------------------------------------------------------------------------- */
+:root[data-theme] {
+  /* ---- Wallpaper -------------------------------------------------------
+     The "desktop" the product floats on: four very soft colour fields, in the
+     brand's green plus a harbour blue and a sandstone warm. Kept low-chroma
+     on purpose — it is a backdrop, not a feature.
+
+     Placement is a contrast decision, not a decorative one. The hero copy
+     occupies the left column, so the top-left field stays faint and the two
+     strongest fields sit top-right and bottom-left, under the live model and
+     below the fold. That keeps the small tertiary text (eyebrows, captions)
+     above 4.5:1 without having to lift --ink-3 away from the palette the
+     rest of the product was tuned against. */
+  --wall-base: #e8eee9;
+  --wall-a: rgba(29, 106, 75, 0.14);
+  --wall-b: rgba(84, 138, 176, 0.26);
+  --wall-c: rgba(198, 178, 130, 0.3);
+  --wall-d: rgba(118, 170, 140, 0.24);
+
+  /* The veil sits between the wallpaper and the content, so text that is not
+     on a panel still has a calm, high-contrast field behind it. */
+  --veil: rgba(255, 255, 255, 0.42);
+
+  /* ---- Glass fills -----------------------------------------------------
+     Four thicknesses. `thin` for bars and tracks, `base` for cards, `thick`
+     for windows read as the "front" layer, `solid` for a selected segment or
+     a menu that must stay crisp. */
+  --glass-thin: rgba(255, 255, 255, 0.5);
+  --glass-base: rgba(255, 255, 255, 0.66);
+  --glass-thick: rgba(255, 255, 255, 0.8);
+  --glass-solid: rgba(255, 255, 255, 0.94);
+  /* The scrolling bar is more opaque than the other thin glass: content slides
+     under it, and at 0.5 the live 3D model smeared into the nav. */
+  --glass-bar: rgba(255, 255, 255, 0.72);
+  --glass-well: rgba(20, 18, 17, 0.04);
+  --field-bg: rgba(255, 255, 255, 0.78);
+  /* One shared height for row-shaped controls, so a select, a text field and
+     a collapsed disclosure all line up in a stack. */
+  --control-h: 50px;
+
+  --glass-line: rgba(20, 18, 17, 0.085);
+  --glass-line-strong: rgba(20, 18, 17, 0.14);
+  /* The 1px inner highlight along the top edge is what makes a translucent
+     panel read as a physical sheet rather than a flat wash. */
+  --glass-edge: rgba(255, 255, 255, 0.9);
+  --glass-edge-soft: rgba(255, 255, 255, 0.5);
+
+  --glass-blur: blur(24px) saturate(180%);
+  --glass-blur-thin: blur(14px) saturate(160%);
+
+  --shadow-glass: 0 1px 1px rgba(15, 26, 20, 0.04),
+    0 8px 24px -12px rgba(15, 26, 20, 0.18),
+    0 28px 60px -34px rgba(15, 26, 20, 0.28);
+  --shadow-window: 0 1px 2px rgba(15, 26, 20, 0.05),
+    0 22px 48px -22px rgba(15, 26, 20, 0.24),
+    0 56px 100px -56px rgba(15, 26, 20, 0.32);
+  --shadow-control: 0 1px 1.5px rgba(15, 26, 20, 0.12),
+    0 1px 1px rgba(15, 26, 20, 0.06);
+  --ring: 0 0 0 3px rgba(29, 106, 75, 0.15);
+}
+
+:root[data-theme="dark"] {
+  --wall-base: #0b0e0d;
+  --wall-a: rgba(92, 174, 140, 0.16);
+  --wall-b: rgba(64, 110, 150, 0.42);
+  --wall-c: rgba(150, 120, 70, 0.24);
+  --wall-d: rgba(70, 130, 110, 0.34);
+
+  --veil: rgba(12, 15, 14, 0.42);
+
+  --glass-thin: rgba(28, 33, 31, 0.5);
+  --glass-base: rgba(36, 42, 39, 0.64);
+  --glass-thick: rgba(46, 53, 49, 0.78);
+  --glass-solid: rgba(60, 68, 63, 0.92);
+  --glass-bar: rgba(20, 24, 23, 0.74);
+  --glass-well: rgba(0, 0, 0, 0.26);
+  --field-bg: rgba(0, 0, 0, 0.24);
+
+  --glass-line: rgba(255, 255, 255, 0.1);
+  --glass-line-strong: rgba(255, 255, 255, 0.18);
+  --glass-edge: rgba(255, 255, 255, 0.08);
+  --glass-edge-soft: rgba(255, 255, 255, 0.04);
+
+  --glass-blur: blur(26px) saturate(150%);
+  --glass-blur-thin: blur(16px) saturate(140%);
+
+  --shadow-glass: 0 1px 1px rgba(0, 0, 0, 0.3),
+    0 10px 30px -14px rgba(0, 0, 0, 0.5),
+    0 34px 70px -40px rgba(0, 0, 0, 0.6);
+  --shadow-window: 0 1px 2px rgba(0, 0, 0, 0.34),
+    0 24px 54px -24px rgba(0, 0, 0, 0.55),
+    0 60px 110px -60px rgba(0, 0, 0, 0.7);
+  --shadow-control: 0 1px 1.5px rgba(0, 0, 0, 0.4);
+  --ring: 0 0 0 3px rgba(92, 174, 140, 0.22);
+}
+
+/* Re-point the shared tokens at the glass materials. Everything downstream
+   that already reads --gc-* or the original GreenCost names inherits the new
+   surfaces without a per-selector rule. */
+:root[data-theme] {
+  --canvas: var(--veil);
+  --surface: var(--glass-base);
+  --raised: var(--glass-thick);
+  --sunken: var(--glass-well);
+
+  --line: var(--glass-line);
+  --line-strong: var(--glass-line-strong);
+
+  --gc-bg: var(--veil);
+  --gc-surface: var(--glass-base);
+  --gc-raised: var(--glass-thick);
+  --gc-inset: var(--glass-well);
+  --gc-line: var(--glass-line);
+  --gc-shadow: var(--shadow-glass);
+
+  --ui-border: var(--glass-line);
+  --ui-shadow: var(--shadow-glass);
+
+  /* macOS shapes control corners more generously than the old 6px scale. */
+  --r-control: 10px;
+  --r-card: 16px;
+  --r-panel: 22px;
+  --r-window: 26px;
+
+  --shadow-rest: 0 1px 2px rgba(15, 26, 20, 0.05);
+  --shadow-raise: var(--shadow-glass);
+}
+
+/* --------------------------------------------------------------------------
+   2. Wallpaper
+   Negative z-index keeps both pseudo-elements behind the body's veil, which
+   is what gives flat text areas their calm field.
+   -------------------------------------------------------------------------- */
+:root[data-theme] {
+  background: var(--wall-base);
+}
+
+:root[data-theme]::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(
+      62vmax 52vmax at 14% 4%,
+      var(--wall-a),
+      transparent 74%
+    ),
+    radial-gradient(58vmax 48vmax at 86% 0%, var(--wall-b), transparent 76%),
+    radial-gradient(70vmax 58vmax at 82% 98%, var(--wall-c), transparent 78%),
+    radial-gradient(60vmax 52vmax at 4% 96%, var(--wall-d), transparent 76%);
+}
+
+/* A whisper of grain. Without it the four wide gradients band on 8-bit
+   panels, which is the one artefact that makes glass look cheap. */
+:root[data-theme]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.4;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+  mix-blend-mode: overlay;
+}
+
+/* The veil. Body is the page surface, so it carries the translucent wash the
+   whole product sits on rather than a flat white. */
+:root[data-theme] body {
+  background: var(--veil) !important;
+}
+
+/* Page frames stop painting an opaque base so the wallpaper can read through
+   from the very top of the document to the footer. */
+:root[data-theme] .gc,
+:root[data-theme] .landing,
+:root[data-theme] .compare-page,
+:root[data-theme] .compare-page main,
+:root[data-theme] .comparison-section,
+:root[data-theme] .results,
+:root[data-theme] .landing-footer,
+:root[data-theme] .method-page,
+:root[data-theme] .method-page main {
+  background-color: transparent !important;
+}
+
+/* Scrollbars follow the material instead of the OS: a hairline track and a
+   translucent thumb, so a long form does not grow a grey stripe. */
+:root[data-theme] * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--glass-line-strong) transparent;
+}
+
+:root[data-theme] ::selection {
+  background: color-mix(in srgb, var(--forest) 24%, transparent);
+}
+
+/* --------------------------------------------------------------------------
+   3. Shared surface
+   -------------------------------------------------------------------------- */
+:root[data-theme] .gc-panel,
+:root[data-theme] .project-card,
+:root[data-theme] .agent-card,
+:root[data-theme] .guide-card,
+:root[data-theme] .world-panel,
+:root[data-theme] .terminal-section,
+:root[data-theme] .apartment-occupancy,
+:root[data-theme] .input-summary,
+:root[data-theme] .rate-summary,
+:root[data-theme] .comparison-review,
+:root[data-theme] .budget-result,
+:root[data-theme] .chart-section,
+:root[data-theme] .ask-section,
+:root[data-theme] .method-page .assumption-card {
+  background-color: var(--glass-thick) !important;
+  background-image: none !important;
+  border: 1px solid var(--glass-line) !important;
+  box-shadow: var(--shadow-glass), inset 0 1px 0 var(--glass-edge-soft) !important;
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+/* The window: the two surfaces that read as a macOS app, not a card. */
+:root[data-theme] .project-card,
+:root[data-theme] .gc-panel {
+  border-radius: var(--r-window) !important;
+  box-shadow: var(--shadow-window), inset 0 1px 0 var(--glass-edge) !important;
+}
+
+/* Smaller cards keep the material but not the window weight. */
+:root[data-theme] .landing-evidence,
+:root[data-theme] .closing-note,
+:root[data-theme] .scope-note,
+:root[data-theme] .confidence-note,
+:root[data-theme] .research-result-note,
+:root[data-theme] .supplier-results,
+:root[data-theme] .chat-answer,
+:root[data-theme] .notice,
+:root[data-theme] .form-note,
+:root[data-theme] .explanation,
+:root[data-theme] .result-disclosure,
+:root[data-theme] .source-card,
+:root[data-theme] .formula,
+:root[data-theme] .assumption-card,
+:root[data-theme] .assumption-feature-grid article,
+:root[data-theme] .review-building,
+:root[data-theme] .import-project,
+:root[data-theme] .ui-empty-steps > span,
+:root[data-theme] .provider-details .provider-row {
+  background-color: var(--glass-base) !important;
+  background-image: none !important;
+  border: 1px solid var(--glass-line) !important;
+  border-radius: var(--r-card);
+}
+
+/* Rows, wells and disclosure items: translucency without a blur pass.
+   Cost lines and other list rows are deliberately NOT here — a bordered
+   row inside a bordered box gives you boxes touching boxes. They use a
+   hairline separator instead; see the row rule below. */
+:root[data-theme] .primary-cost-grid > div,
+:root[data-theme] .toast,
+:root[data-theme] .data-table th,
+:root[data-theme] .recharts-default-tooltip,
+:root[data-theme] .ui-kbd {
+  background-color: var(--glass-base) !important;
+  background-image: none !important;
+  border: 1px solid var(--glass-line) !important;
+  border-radius: var(--r-card);
+}
+
+/* List rows: flat, with a hairline between them so the parent's inset is
+   the only edge the eye sees. */
+:root[data-theme] .cost-line {
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--glass-line) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme] .cost-line:last-child {
+  border-bottom: 0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. Bars
+   -------------------------------------------------------------------------- */
+/* Header — a floating glass capsule rather than a full-bleed bar. The shell
+   inside it keeps the page's measure, so the brand stays on the same left
+   edge as the content below while the capsule bleeds into the gutter. The
+   page scrolls behind it; nothing else has to reserve space for a bar. */
+:root[data-theme] .gc-header {
+  background: transparent !important;
+  border-bottom: 0 !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  padding: var(--s-3) var(--s-3) 0;
+}
+
+:root[data-theme] .gc-header-row {
+  height: 64px;
+  gap: var(--s-5);
+  background: var(--glass-bar) !important;
+  border: 1px solid var(--glass-line) !important;
+  border-radius: 999px;
+  box-shadow: 0 20px 44px -26px rgba(6, 22, 16, 0.55),
+    inset 0 1px 0 var(--glass-edge-soft);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+/* A capsule has less room to give than a full-bleed bar: tighten the link
+   rhythm, and never let a label break across two lines. */
+:root[data-theme] .gc-nav {
+  gap: var(--s-4);
+  margin-left: var(--s-2);
+}
+
+@media (max-width: 1080px) {
+  :root[data-theme] .gc-header-row {
+    padding-inline: var(--s-4);
+  }
+}
+
+:root[data-theme] .form-topline {
+  background-color: var(--glass-base) !important;
+  background-image: none !important;
+  border-bottom: 1px solid var(--glass-line) !important;
+  border-radius: var(--r-window) var(--r-window) 0 0;
+  -webkit-backdrop-filter: var(--glass-blur-thin);
+  backdrop-filter: var(--glass-blur-thin);
+}
+
+:root[data-theme] .gc-footer,
+:root[data-theme] .landing-footer {
+  background: var(--glass-thin) !important;
+  border-top: 1px solid var(--glass-line) !important;
+  -webkit-backdrop-filter: var(--glass-blur-thin);
+  backdrop-filter: var(--glass-blur-thin);
+}
+
+/* The skip link sits on an ink fill, so it must not read the veiled canvas
+   token it used to. */
+:root[data-theme] .gc-skip,
+:root[data-theme] .skip-link {
+  background: var(--ink) !important;
+  color: var(--glass-solid) !important;
+  border: 1px solid var(--glass-line) !important;
+}
+
+/* --------------------------------------------------------------------------
+   5. Controls
+   -------------------------------------------------------------------------- */
+/* Segmented control — the stepper and any .segmented group. One recessed
+   track, one raised selected segment: the macOS idiom, not four outlined
+   buttons. */
+:root[data-theme] .form-stepper,
+:root[data-theme] .segmented {
+  background-color: var(--glass-well) !important;
+  background-image: none !important;
+  border: 1px solid var(--glass-line) !important;
+  border-radius: var(--r-card) !important;
+  padding: 5px;
+  gap: 4px;
+  -webkit-backdrop-filter: var(--glass-blur-thin);
+  backdrop-filter: var(--glass-blur-thin);
+}
+
+:root[data-theme] .form-stepper button,
+:root[data-theme] .segmented button {
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-radius: calc(var(--r-card) - 5px) !important;
+  box-shadow: none !important;
+  transition: background var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+}
+
+:root[data-theme] .form-stepper button:hover:not(.active):not(:disabled),
+:root[data-theme] .segmented button:hover:not(.active):not(:disabled) {
+  background: var(--glass-thin) !important;
+}
+
+:root[data-theme] .form-stepper .active,
+:root[data-theme] .segmented .active {
+  background: var(--glass-solid) !important;
+  background-image: none !important;
+  box-shadow: var(--shadow-control), inset 0 1px 0 var(--glass-edge) !important;
+}
+
+:root[data-theme] .form-stepper button:not(.active):not(.complete) span {
+  background: transparent !important;
+  border: 1px solid var(--glass-line-strong);
+}
+
+:root[data-theme] .form-stepper .complete span {
+  background: color-mix(in srgb, var(--forest) 16%, transparent) !important;
+  color: var(--forest) !important;
+  border: 0;
+}
+
+:root[data-theme] .form-stepper .active span {
+  background: var(--forest) !important;
+  color: var(--forest-ink) !important;
+  border: 0;
+}
+
+:root[data-theme] .form-stepper b,
+:root[data-theme] .form-stepper .active b {
+  color: var(--ink) !important;
+}
+
+:root[data-theme] .form-stepper .complete b {
+  color: var(--ink-2) !important;
+}
+
+/* Buttons: macOS rounded rectangles. Pills stay reserved for chips and
+   badges, where the round shape is doing real work. */
+:root[data-theme] .gc-btn,
+:root[data-theme] .button,
+:root[data-theme] .button-primary,
+:root[data-theme] .button-ghost,
+:root[data-theme] .button-outline,
+:root[data-theme] .header-cta {
+  border-radius: var(--r-control) !important;
+  border: 1px solid var(--glass-line-strong) !important;
+  background: var(--glass-base) !important;
+  box-shadow: var(--shadow-control), inset 0 1px 0 var(--glass-edge) !important;
+  -webkit-backdrop-filter: var(--glass-blur-thin);
+  backdrop-filter: var(--glass-blur-thin);
+  transition: background var(--t-fast) var(--ease),
+    border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease);
+}
+
+:root[data-theme] .gc-btn:hover,
+:root[data-theme] .button:hover,
+:root[data-theme] .button-ghost:hover,
+:root[data-theme] .button-outline:hover {
+  background: var(--glass-thick) !important;
+  border-color: var(--glass-line-strong) !important;
+}
+
+:root[data-theme] .gc-btn:active,
+:root[data-theme] .button:active {
+  transform: translateY(0.5px);
+  box-shadow: inset 0 1px 2px rgba(15, 26, 20, 0.12) !important;
+}
+
+:root[data-theme] .gc-btn-primary,
+:root[data-theme] .button-primary,
+:root[data-theme] .closing-note .button {
+  background: var(--forest) !important;
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--forest) 84%, #ffffff) 0%,
+    var(--forest) 62%
+  ) !important;
+  border-color: color-mix(in srgb, var(--forest) 78%, #000000) !important;
+  color: var(--forest-ink) !important;
+  box-shadow: 0 1px 2px rgba(15, 26, 20, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
+}
+
+:root[data-theme] .gc-btn-primary:hover,
+:root[data-theme] .button-primary:hover:not(:disabled),
+:root[data-theme] .closing-note .button:hover:not(:disabled) {
+  background: var(--forest-hover) !important;
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--forest-hover) 84%, #ffffff) 0%,
+    var(--forest-hover) 62%
+  ) !important;
+  border-color: color-mix(in srgb, var(--forest-hover) 78%, #000000) !important;
+}
+
+:root[data-theme] .gc-btn-quiet {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+:root[data-theme] .gc-btn-quiet:hover {
+  background: var(--glass-thin) !important;
+  border-color: var(--glass-line) !important;
+}
+
+:root[data-theme] .gc-burger,
+:root[data-theme] .theme-toggle {
+  border-radius: var(--r-control) !important;
+  border: 1px solid var(--glass-line) !important;
+  background: var(--glass-thin) !important;
+  box-shadow: inset 0 1px 0 var(--glass-edge) !important;
+}
+
+:root[data-theme] .gc-nav a {
+  padding: 6px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+  transition: background var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease);
+}
+
+:root[data-theme] .gc-nav a:hover {
+  background: var(--glass-thin);
+}
+
+:root[data-theme] .gc-nav a[aria-current="page"] {
+  background: var(--glass-base);
+  box-shadow: inset 0 1px 0 var(--glass-edge);
+}
+
+:root[data-theme] .gc-nav a[aria-current="page"]::after {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   6. Fields
+   -------------------------------------------------------------------------- */
+:root[data-theme] .field input,
+:root[data-theme] .field select,
+:root[data-theme] .field textarea,
+:root[data-theme] .ui-select-trigger,
+:root[data-theme] .dc-money-input,
+:root[data-theme] .area-control input,
+:root[data-theme] .area-control select {
+  background: var(--field-bg) !important;
+  background-image: none !important;
+  border: 1px solid var(--glass-line-strong) !important;
+  border-radius: var(--r-control) !important;
+  box-shadow: inset 0 1px 2px rgba(15, 26, 20, 0.05) !important;
+  transition: border-color var(--t-fast) var(--ease),
+    box-shadow var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+}
+
+/* One height for every row-shaped control. A select, a text input and a
+   collapsed disclosure are the same object to the eye, so they have to be
+   the same size; left alone the layers below measured them at 57.6, 50 and
+   101 pixels and the stack looked like a mistake. */
+:root[data-theme] .field input,
+:root[data-theme] .field select,
+:root[data-theme] .ui-select-trigger,
+:root[data-theme] .dc-money-input,
+:root[data-theme] .area-control input,
+:root[data-theme] .area-control select {
+  height: var(--control-h);
+}
+
+:root[data-theme] .form-details:not([open]) {
+  padding-block: 0;
+}
+
+/* display is deliberately not forced here. The cost-breakdown summary is a
+   grid ([label 1fr][value auto][chevron 36px]) in ui-layer.css; forcing
+   flex on it spread its three items apart and the money value drifted to
+   the middle of the row. Every other summary already gets flex from the
+   base sheets, so only alignment and height belong in this layer. */
+:root[data-theme] .form-details > summary {
+  align-items: center;
+  min-height: var(--control-h);
+  padding-block: 0;
+}
+
+:root[data-theme] .field input:hover:not(:disabled),
+:root[data-theme] .field select:hover:not(:disabled),
+:root[data-theme] .field textarea:hover:not(:disabled),
+:root[data-theme] .ui-select-trigger:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--glass-line-strong) 55%,
+    var(--forest)
+  ) !important;
+}
+
+/* macOS focus: the field itself grows the ring, rather than a detached
+   outline sitting 3px away from the control. */
+:root[data-theme] .field input:focus,
+:root[data-theme] .field input:focus-visible,
+:root[data-theme] .field select:focus,
+:root[data-theme] .field select:focus-visible,
+:root[data-theme] .field textarea:focus,
+:root[data-theme] .field textarea:focus-visible,
+:root[data-theme] .ui-select-trigger:focus-visible,
+:root[data-theme] .dc-money-input:focus {
+  outline: 0 !important;
+  border-color: var(--forest) !important;
+  box-shadow: var(--ring) !important;
+}
+
+/* Checkbox: a 15px rounded square, filled when on. */
+:root[data-theme] .ui-checkbox {
+  border-radius: 4px !important;
+  border: 1px solid var(--glass-line-strong) !important;
+  background: var(--field-bg) !important;
+  box-shadow: inset 0 1px 2px rgba(15, 26, 20, 0.06) !important;
+}
+
+:root[data-theme] .ui-checkbox[data-state="checked"],
+:root[data-theme] .ui-checkbox[aria-checked="true"] {
+  background: var(--forest) !important;
+  border-color: color-mix(in srgb, var(--forest) 78%, #000000) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Building-type tiles and choice chips read as small glass tiles. */
+:root[data-theme] .building-choices button {
+  background: var(--glass-base) !important;
+  background-image: none !important;
+  border: 1px solid var(--glass-line-strong) !important;
+  border-radius: var(--r-card) !important;
+  box-shadow: inset 0 1px 0 var(--glass-edge) !important;
+  transition: background var(--t-fast) var(--ease),
+    border-color var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+}
+
+:root[data-theme] .building-choices button:hover {
+  background: var(--glass-thick) !important;
+  transform: translateY(-1px);
+}
+
+:root[data-theme] .building-choices .selected {
+  background: color-mix(
+    in srgb,
+    var(--forest) 14%,
+    var(--glass-thick)
+  ) !important;
+  border: 2px solid var(--forest) !important;
+  color: var(--forest) !important;
+  box-shadow: var(--ring), inset 0 1px 0 var(--glass-edge) !important;
+}
+
+:root[data-theme] .choice-row button {
+  background: var(--glass-base) !important;
+  background-image: none !important;
+  border: 1px solid var(--glass-line) !important;
+  border-radius: var(--r-control) !important;
+  box-shadow: inset 0 1px 0 var(--glass-edge) !important;
+}
+
+:root[data-theme] .choice-row button:hover {
+  background: var(--glass-thick) !important;
+}
+
+:root[data-theme] .choice-row button.selected,
+:root[data-theme] .choice-row .selected {
+  background: var(--forest) !important;
+  background-image: none !important;
+  border-color: color-mix(in srgb, var(--forest) 78%, #000000) !important;
+  color: var(--forest-ink) !important;
+  box-shadow: var(--shadow-control), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+}
+
+/* --------------------------------------------------------------------------
+   7. Detail chrome
+   -------------------------------------------------------------------------- */
+:root[data-theme] .block-number {
+  background: color-mix(in srgb, var(--forest) 16%, var(--glass-base)) !important;
+  background-image: none !important;
+  color: var(--forest) !important;
+  border: 1px solid color-mix(in srgb, var(--forest) 26%, transparent) !important;
+  border-radius: var(--r-control) !important;
+}
+
+:root[data-theme] .form-block {
+  border-bottom: 1px solid var(--glass-line) !important;
+}
+
+:root[data-theme] .form-block h4,
+:root[data-theme] .input-summary h4 {
+  color: var(--ink) !important;
+}
+
+:root[data-theme] .form-block h4::before,
+:root[data-theme] .form-block h4:before {
+  width: 3px;
+  border-radius: 3px;
+}
+
+:root[data-theme] .block-heading p,
+:root[data-theme] .form-heading p {
+  color: var(--ink-2) !important;
+}
+
+/* A disclosure is a container, so it needs an inset: the fields and rows
+   inside it were running into its border. The summary strip keeps the full
+   width by paying the inset back with a negative margin. */
+:root[data-theme] .form-details {
+  border: 1px solid var(--glass-line) !important;
+  border-radius: var(--r-card) !important;
+  overflow: hidden;
+  padding-inline: 16px;
+}
+
+:root[data-theme] .form-details summary {
+  background: var(--glass-thin) !important;
+  margin-inline: -16px;
+  padding-inline: 16px;
+}
+
+:root[data-theme] .form-details[open] summary {
+  border-bottom: 1px solid var(--glass-line);
+}
+
+:root[data-theme] .projects-trigger,
+:root[data-theme] .projects-panel,
+:root[data-theme] .research-toggle,
+:root[data-theme] .review-building {
+  background-color: var(--glass-base) !important;
+  background-image: none !important;
+  border: 1px solid var(--glass-line) !important;
+  border-radius: var(--r-card) !important;
+  box-shadow: inset 0 1px 0 var(--glass-edge) !important;
+}
+
+:root[data-theme] .projects-panel,
+:root[data-theme] .ui-tooltip-bubble {
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--shadow-window) !important;
+}
+
+:root[data-theme] .ui-tooltip-bubble {
+  background: var(--glass-solid) !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--glass-line) !important;
+  border-radius: 12px;
+}
+
+:root[data-theme] .ui-tooltip-bubble::after {
+  background: var(--glass-solid);
+  border: 1px solid var(--glass-line);
+}
+
+:root[data-theme] .toast {
+  border-radius: var(--r-card) !important;
+  box-shadow: var(--shadow-window) !important;
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+/* --------------------------------------------------------------------------
+   8. Landing surface
+   -------------------------------------------------------------------------- */
+:root[data-theme] .gc-strip,
+:root[data-theme] .gc-example {
+  background-color: var(--glass-thin) !important;
+  background-image: none !important;
+  border-block: 1px solid var(--glass-line);
+}
+
+:root[data-theme] .gc-step,
+:root[data-theme] .gc-chart,
+:root[data-theme] .gc-outcome,
+:root[data-theme] .gc-close-grid,
+:root[data-theme] .gc-faq-list {
+  background-color: var(--glass-base) !important;
+  background-image: none !important;
+  border: 1px solid var(--glass-line) !important;
+  border-radius: var(--r-card) !important;
+  box-shadow: var(--shadow-glass), inset 0 1px 0 var(--glass-edge-soft) !important;
+}
+
+/* The steps were bare columns in a 3-up grid with no horizontal padding, which
+   was fine while they had no box. Now that each one is a panel its content
+   needs an inset, or the copy runs into the border. */
+:root[data-theme] .gc-step {
+  padding: 30px 24px 28px;
+}
+
+/* Same story for the closing band: it was a bare two-column section inside
+   the page gutter, so its buttons sat on the card's edge once it became one. */
+:root[data-theme] .gc-close-grid {
+  padding: 32px;
+}
+
+/* The FAQ is a list, not a stack of cards. One glass panel with hairline rows
+   between the questions — the same list-group shape macOS uses in System
+   Settings. Making each row its own card left them touching with no gutter. */
+:root[data-theme] .gc-faq-list {
+  padding: 4px 24px;
+  border-radius: var(--r-panel) !important;
+}
+
+:root[data-theme] .gc-faq-list details {
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--glass-line) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 18px 2px;
+}
+
+:root[data-theme] .gc-faq-list details:last-child {
+  border-bottom: 0 !important;
+}
+
+:root[data-theme] .gc-faq-list summary {
+  border-radius: 6px;
+}
+
+:root[data-theme] .gc-scene-embed {
+  background: transparent !important;
+}
+
+/* --------------------------------------------------------------------------
+   9. Focus, motion and graceful degradation
+   -------------------------------------------------------------------------- */
+:root[data-theme] :focus-visible {
+  outline: 2px solid var(--forest);
+  outline-offset: 2px;
+}
+
+:root[data-theme] .field input:focus-visible,
+:root[data-theme] .field select:focus-visible,
+:root[data-theme] .field textarea:focus-visible {
+  outline: 0;
+}
+
+/* A browser without backdrop-filter gets opaque materials rather than
+   wallpaper bleeding through its text. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root[data-theme] {
+    --glass-thin: color-mix(in srgb, var(--veil) 82%, var(--wall-base));
+    --glass-base: color-mix(in srgb, var(--veil) 88%, var(--wall-base));
+    --glass-thick: color-mix(in srgb, var(--veil) 94%, var(--wall-base));
+  }
+}
+
+/* macOS ships a Reduce Transparency switch; honour the same preference. */
+@media (prefers-reduced-transparency: reduce) {
+  :root[data-theme] {
+    --glass-thin: color-mix(in srgb, var(--veil) 84%, var(--wall-base));
+    --glass-base: color-mix(in srgb, var(--veil) 90%, var(--wall-base));
+    --glass-thick: color-mix(in srgb, var(--veil) 96%, var(--wall-base));
+    --glass-solid: color-mix(in srgb, var(--veil) 100%, var(--wall-base));
+    --glass-blur: none;
+    --glass-blur-thin: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme] .gc-btn,
+  :root[data-theme] .button,
+  :root[data-theme] .building-choices button,
+  :root[data-theme] .form-stepper button {
+    transition: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   10. Small screens
+   The window chrome earns its space on desktop only; below 760px the title
+   bar is already a two-row grid, so the dots and their gutter go away.
+   -------------------------------------------------------------------------- */
+@media (max-width: 760px) {
+  :root[data-theme] .project-card::before,
+  :root[data-theme] .gc-panel::before {
+    display: none;
+  }
+
+  :root[data-theme] .form-topline {
+    padding-left: 18px;
+  }
+}
+
+/* Below 860px the links become a drawer. It hangs off the capsule rather
+   than off a full-bleed bar, so it needs the capsule's own offset: 12px of
+   float, a 64px capsule, and a 12px gap. */
+@media (max-width: 860px) {
+  :root[data-theme] .gc-nav.is-open {
+    top: 88px;
+    left: var(--s-3);
+    right: var(--s-3);
+    border: 1px solid var(--glass-line);
+    border-radius: var(--r-panel);
+    background: var(--glass-thick) !important;
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+  }
+}

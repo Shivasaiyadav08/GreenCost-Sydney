@@ -12,6 +12,8 @@ import './ui-layer.css';
 import './forms.css';
 import './light-surfaces.css';
 import './detailed-costs.css';
+/* Last: the glass material pass is the surface authority for both themes. */
+import './glass.css';
 import {themeInitialization} from '@/lib/theme-initialization';
 
 export const metadata:Metadata={

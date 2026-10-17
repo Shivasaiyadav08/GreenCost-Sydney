@@ -1,4 +1,11 @@
-.landing{--forest:#214c3b;--paper:#f8f7f1;--ink:#253b30;--muted:#748071;--line:#dfe4d7;background:var(--paper);overflow:clip}
+/* The palette below is a *light* palette. It must not apply in dark mode:
+   unscoped, it pinned --forest and --line to light values for the whole
+   .landing subtree, which is the wrapper for the calculator as well as the
+   marketing pages, so in dark mode a block number rendered #164a37 on a dark
+   chip and every hairline read as a bright line. Scoping it to light keeps
+   the light theme byte-identical and lets dark inherit tokens.css. */
+:root:not([data-theme="dark"]) .landing{--forest:#214c3b;--paper:#f8f7f1;--ink:#253b30;--muted:#748071;--line:#dfe4d7}
+.landing{background:var(--paper);overflow:clip}
 .landing section[id],.landing div[id]{scroll-margin-top:90px}
 .landing-header{height:94px;max-width:1440px;margin:auto;padding:0 5.5%;display:flex;align-items:center;justify-content:space-between;gap:24px}
 .landing-brand{display:flex;align-items:center;gap:11px}.landing-brand>span{display:grid;place-items:center;width:42px;height:42px;background:var(--brand-mark-bg);border-radius:13px;color:var(--brand-mark-ink);transform:rotate(-7deg)}

@@ -1,5 +1,6 @@
 /* Content is visible by default. No scroll-triggered opacity gates. */
-.landing{--muted:#5d6d60;overflow:visible}
+.landing{overflow:visible}
+:root:not([data-theme="dark"]) .landing{--muted:#5d6d60}
 .landing .hero-description,.landing .hero-trust,.landing-header nav,.small-note,.field small{color:#607064}
 .comparison-section{padding-top:64px!important}
 .comparison-intro{margin-bottom:28px!important}.comparison-intro h2{font-size:clamp(32px,4vw,54px)!important}

@@ -5,7 +5,10 @@
    painted the canvas token correctly went dark. Only the typeface is kept. */
 body{font-family:Inter,Arial,sans-serif}
 button,input,select,textarea{font:inherit}
-.landing{--paper:#fafbf9;--forest:#164a37;--ink:#18201d;--muted:#57615c;--line:#e4e8e5;overflow:visible}
+/* Light-only, for the reason given in landing.css: a light palette pinned on
+   the shared .landing wrapper leaks into dark mode. */
+:root:not([data-theme="dark"]) .landing{--paper:#fafbf9;--forest:#164a37;--ink:#18201d;--muted:#57615c;--line:#e4e8e5}
+.landing{overflow:visible}
 .landing h1,.landing h2,.landing h3,.standalone h1,.standalone h2,.results h1,.results h2{font-family:Inter,Arial,sans-serif!important;font-weight:600;letter-spacing:-.04em;color:var(--ink)}
 .landing p,.landing small,.landing label{line-height:1.65}
 .landing .small-note,.landing .field small,.landing .field>label,.landing .form-heading p,.landing .form-stepper b{color:#56645d!important}

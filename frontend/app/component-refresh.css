@@ -2,7 +2,10 @@
 /* Palette resolves through tokens.css. The former
    `body{background:#f8faf8;color:var(--ui-text)}` pinned the page to a light
    canvas regardless of theme and has been removed. */
-.landing,.method-page{--paper:#f8faf8;--ink:var(--ui-text);--muted:var(--ui-muted)}
+/* --ink and --muted already resolve through the themed tokens; only the
+   --paper pin was light-only, so it is scoped. */
+:root:not([data-theme="dark"]) .landing,:root:not([data-theme="dark"]) .method-page{--paper:#f8faf8}
+.landing,.method-page{--ink:var(--ui-text);--muted:var(--ui-muted)}
 button,a,summary{transition:background-color .18s,color .18s,border-color .18s,box-shadow .18s,transform .18s var(--ui-ease)}
 button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid #397b5e;outline-offset:4px}
 .button,.header-cta{min-height:44px;border-radius:999px!important;font-weight:600;letter-spacing:-.01em}

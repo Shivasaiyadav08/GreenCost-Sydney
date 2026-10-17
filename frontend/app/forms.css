@@ -26,8 +26,14 @@
   min-height: calc(2 * var(--t-ui) * 1.45);
 }
 
+/* The label does not grow. It used to be `flex: 1 1 auto`, which ate the whole
+   row and pushed the ⓘ trigger to the far edge of the column — so across a
+   two-column grid the icons zig-zagged (label, gap, icon) instead of sitting
+   beside the words they explain. The two-line reservation that keeps
+   neighbouring inputs aligned lives on .field-label above, so shrinking the
+   label here does not affect that alignment. */
 .field > .field-label > label {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-width: 0;
   line-height: 1.45;
 }

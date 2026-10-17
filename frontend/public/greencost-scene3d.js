@@ -424,8 +424,48 @@ function place(el,p,show){
   el.style.left=((v.x+1)/2*stage.clientWidth)+'px';el.style.top=((1-v.y)/2*stage.clientHeight)+'px';
 }
 var t0=performance.now(),tl=t0;
+/* The scene used to redraw at the display's refresh rate for the whole life of
+   the document, whether or not anyone could see it. In the landing page that
+   is around 8ms of main thread on every frame — even with the panel thousands
+   of pixels below the fold — and the page's own scrolling had to compete with
+   it. Three rules now apply instead:
+
+   1. While the panel is off screen, or the tab is hidden, nothing is drawn and
+      no frame is even scheduled. The parent's scroll and resize wake it again,
+      with a slow safety check in case an event is ever missed.
+   2. While it is visible and untouched it draws at about 30fps. A slow orbit
+      gains nothing from 120fps, and the freed main thread is exactly what the
+      page's scrolling was queueing behind.
+   3. While the page itself is scrolling the scene holds still and picks up
+      again as soon as the gesture stops. Nobody studies the model mid-scroll. */
+var IDLE_MS=1000/30,SCROLL_HOLD=160;
+var awake=false,lastDraw=0,scrollTimer=0;
+
+function onScreen(){
+  try{
+    if(document.visibilityState==='hidden')return false;
+    var fe=window.frameElement;
+    if(!fe)return true;              // standalone page, or a cross-origin parent: never pause
+    var win=fe.ownerDocument.defaultView,r=fe.getBoundingClientRect();
+    var vh=(win&&win.innerHeight)||0;
+    return r.bottom>-160&&r.top<vh+160;
+  }catch(e){return true;}
+}
+
+function wake(){if(!awake&&onScreen()){awake=true;lastDraw=0;requestAnimationFrame(loop);}}
+
+function onParentScroll(){
+  if(scrollTimer)clearTimeout(scrollTimer);
+  awake=false;
+  scrollTimer=setTimeout(function(){scrollTimer=0;wake();},SCROLL_HOLD);
+}
+
 function loop(){
-  var now=performance.now(),t=(now-t0)/1000,dt=Math.min(.05,(now-tl)/1000);tl=now;live(t,dt);
+  if(!awake||!onScreen()){awake=false;return;}   // stop the tick; a scroll, resize or timer restarts it
+  var now=performance.now();
+  if(!dragging&&now-lastDraw<IDLE_MS){requestAnimationFrame(loop);return;}
+  lastDraw=now;
+  var t=(now-t0)/1000,dt=Math.min(.05,(now-tl)/1000);tl=now;live(t,dt);
   if(state.spin&&!dragging)th+=.0022;
   if(!reduce)root.position.y=Math.sin(t*.9)*.07;
   cam();root.updateMatrixWorld(true);
@@ -433,7 +473,15 @@ function loop(){
   place(pins.solar,u.solar,u.has);place(pins.ins,u.ins,true);place(pins.tank,u.tank,true);
   renderer.render(scene,camera);requestAnimationFrame(loop);
 }
-initWorld();build();loop();
+
+initWorld();build();awake=true;loop();
+
+try{
+  var pw=window.frameElement&&window.frameElement.ownerDocument.defaultView;
+  if(pw){pw.addEventListener('scroll',onParentScroll,{passive:true});pw.addEventListener('resize',wake);}
+}catch(e){}
+document.addEventListener('visibilitychange',wake);
+setInterval(wake,1200);
 
 function press(id,key,after){var b=document.getElementById(id);b.addEventListener('click',function(){state[key]=!state[key];b.setAttribute('aria-pressed',state[key]);if(after)after();});}
 press('solar','solar',build);press('night','night',applyTime);press('rain','rain',applyTime);press('spin','spin');press('labels','labels');
